@@ -1,0 +1,5 @@
+1. Provide a Show instance for AI.MEP.Types.Chromosome
+   such that a Haskell code is generated.
+
+2. Provide a Storable instance for AI.MEP.Types.Gene
+   and make the Chromosome a Data.Vector.Storable.
