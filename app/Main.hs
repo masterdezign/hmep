@@ -1,13 +1,8 @@
 module Main where
 
 import qualified Data.Vector as V
-import           Data.Ord ( comparing )
-import           Data.List
-                 ( group
-                 , sort
-                 , sortBy
-                 , foldl'
-                 )
+import           Data.List ( foldl' )
+import           Control.Monad ( foldM )
 import           Numeric.LinearAlgebra
                  ( randomVector
                  , RandDist( Uniform )
@@ -18,7 +13,10 @@ import AI.MEP
 
 ops = V.fromList [('*', (*)), ('+', (+)), ('/', (/)), ('-', (-))]
 
-config = defaultConfig { c'ops = ops }
+config = defaultConfig {
+  c'ops = ops
+  , c'length = 50
+  }
 
 seed :: Int
 seed = 3
@@ -61,17 +59,20 @@ avgLoss xs =
   let (r, len) = foldl' (\(c, i) (val, _, _) -> (c + val, i + 1)) (0, 0) xs
   in r / (fromIntegral len)
 
-generations :: Int
-generations = 50
+runIO (pop, g') i = do
+  let (newPop, g2) = foldr (\_ xg -> run xg) (pop, g') [1..generations]
+  putStrLn $ "Population " ++ show (i * generations) ++ ": average loss " ++ show (avgLoss newPop)
+  return (newPop, g2)
+    where
+      run (x, g) = runRandom (nextGeneration x) g
+      generations = 40
 
 main :: IO ()
 main = do
   g <- newPureMT
   let (pop, g') = runRandom (initialize config) g
       popEvaluated = evaluateGeneration loss pop
-  putStrLn $ "Average loss: " ++ show (avgLoss popEvaluated)
+  putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated)
 
-  let run (x, g) = runRandom (nextGeneration x) g
-      (newPop, _) = foldr (\_ xg -> run xg) (popEvaluated, g') [1..generations]
-
-  putStrLn $ "Average loss: " ++ show (avgLoss newPop)
+  (final, _) <- foldM runIO (popEvaluated, g') [1..100]
+  print $ last final

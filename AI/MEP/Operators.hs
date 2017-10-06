@@ -57,8 +57,8 @@ data Config a = Config
 --   , p'mutation = 0.1
 --   , p'crossover = 0.9
 --
---   , c'length = 30
---   , c'popSize = 40
+--   , c'length = 50
+--   , c'popSize = 100
 --   , c'popN = 1
 --   , c'ops = V.empty  -- <-- To be overridden
 --   , c'vars = 1
@@ -72,8 +72,8 @@ defaultConfig = Config
   , p'mutation = 0.1
   , p'crossover = 0.9
 
-  , c'length = 30
-  , c'popSize = 40
+  , c'length = 50
+  , c'popSize = 100
   , c'popN = 1
   , c'ops = V.empty
   , c'vars = 1
