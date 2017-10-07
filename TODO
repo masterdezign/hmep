@@ -7,6 +7,3 @@
 
 3. Improve the demo: provide a CLI interface to work
    with external data (using loadMatrix from hmatrix library)
-
-4. Properly handle NaN values, which may arise e.g. after
-   division by zero

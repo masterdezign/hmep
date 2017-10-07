@@ -38,7 +38,12 @@ dataset1 = V.map (\x -> (x, function x)) $ V.fromList $ randDomain nSamples
   where nSamples = 50
         function x = (cos x)^2
 
-dist x y = abs $ x - y
+-- | Absolute value distance between two scalar values
+dist :: Double -> Double -> Double
+dist x y = if isNaN x || isNaN y
+  -- Large distance
+  then 10000
+  else abs $ x - y
 
 loss :: LossFunction Double
 loss evalf = (V.singleton i', loss')
