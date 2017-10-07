@@ -1,5 +1,5 @@
 name:                hmep
-version:             0.0.0
+version:             0.0.1
 synopsis:            HMEP Multi Expression Programming –
                      a genetic programming variant
 description:         A multi expression programming implementation with
@@ -14,7 +14,7 @@ maintainer:          dev at penkovsky dot com
 copyright:           2017 Bogdan Penkovsky
 category:            AI
 build-type:          Simple
-extra-source-files:  README.md TODO
+extra-source-files:  README.md TODO CHANGELOG.md
 cabal-version:       >=1.22
 
 library
