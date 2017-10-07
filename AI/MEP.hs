@@ -28,8 +28,8 @@ Copyright Bogdan Penkovsky (c) 2017
   Population 50: average loss 3.3219954564955856e-15
   @
 
-  The value of 3.3e-15 is zero with respect to the
-  rounding errors. It means that the exact expression was found!
+  The average value of 3.3e-15 is close to zero, indicating that
+  the exact expression was found!
 
   The produced output was:
 
@@ -42,7 +42,7 @@ Copyright Bogdan Penkovsky (c) 2017
 
   From here we can infer that
   @
-  cos^2(x) = 1 - v2 = 1 - v1 * v1 = 1 - sin^2(x)
+  cos^2(x) = 1 - v2 = 1 - v1 * v1 = 1 - sin^2(x).
   @
 
   Sweet!
