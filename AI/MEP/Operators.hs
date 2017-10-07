@@ -143,7 +143,7 @@ evolve c loss mut cross select phenotypes = do
       ev phen0 _ = do
         chr1 <- select phen0
         chr2 <- select phen0
-        (of1, of2) <- cross chr1 chr2
+        (of1, of2) <- withProbability pc (uncurry cross) (chr1, chr2)
         of1' <- withProbability pm mut of1
         of2' <- withProbability pm mut of2
         let r1@(val1, _, _) = phenotype loss of1'
