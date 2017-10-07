@@ -8,6 +8,8 @@ import qualified Data.Vector as V
 
 type Population a = [Chromosome a]
 
+type Phenotype a = (Double, Chromosome a, V.Vector Int)
+
 -- | A chromosome is a vector of genes
 type Chromosome a = V.Vector (Gene a Int)
 

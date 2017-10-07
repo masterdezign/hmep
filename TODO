@@ -1,5 +1,9 @@
-1. Provide a Show instance for AI.MEP.Types.Chromosome
-   such that a Haskell code is generated.
-
-2. Provide a Storable instance for AI.MEP.Types.Gene
+1. Provide a Storable instance for AI.MEP.Types.Gene
    and make the Chromosome a Data.Vector.Storable.
+
+2. Improve code generation. Features:
+   a) Removal of dead (unused) expressions
+   b) Subexpression elimination, e.g. x0 / x0 -> 1
+
+3. Improve demo: work with external data (using loadMatrix
+   from hmatrix library)

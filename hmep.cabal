@@ -1,7 +1,7 @@
 name:                hmep
 version:             0.0.0
 synopsis:            HMEP Multi Expression Programming –
-                     a genetic programming variant encoding multiple solutions
+                     a genetic programming variant
 description:         A multi expression programming implementation with
                      focus on speed.
                      .

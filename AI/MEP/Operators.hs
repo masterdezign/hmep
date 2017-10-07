@@ -5,7 +5,6 @@ module AI.MEP.Operators (
   Config (..)
   , defaultConfig
   , LossFunction
-  , Phenotype
   -- * Genetic operators
   , initialize
   , evaluateGeneration
@@ -99,8 +98,6 @@ phenotype
      -> Phenotype a
 phenotype loss chr = let (is, val) = loss (evaluate chr)
                      in (val, chr, is)
-
-type Phenotype a = (Double, Chromosome a, V.Vector Int)
 
 -- | Randomly generate a new population
 initialize :: Config Double -> Rand (Population Double)

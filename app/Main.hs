@@ -1,5 +1,12 @@
 module Main where
 
+{-
+  | = Example application: trigonometry cheating
+
+  Find the trigonometric expression of cos(x) through sin(x)
+  using our automatic programming method.
+-}
+
 import qualified Data.Vector as V
 import           Data.List ( foldl' )
 import           Control.Monad ( foldM )
@@ -9,15 +16,17 @@ import           Numeric.LinearAlgebra
                  , toList
                  )
 
-import AI.MEP
+import           AI.MEP
 
-ops = V.fromList [('*', (*)), ('+', (+)), ('/', (/)), ('-', (-))]
+ops = V.fromList [('*', (*)), ('+', (+)), ('/', (/)), ('-', (-)),
+  ('s', (\x _ -> sin x))]
 
 config = defaultConfig {
   c'ops = ops
   , c'length = 50
   }
 
+-- Feel free to change the random number generation seed
 seed :: Int
 seed = 3
 
@@ -25,8 +34,9 @@ randDomain :: Int -> [Double]
 randDomain = map (subtract pi. (2*pi *)). toList. randomVector seed Uniform
 
 dataset1 :: V.Vector (Double, Double)
-dataset1 = V.map (\x -> (x, sin x)) $ V.fromList $ randDomain nSamples
+dataset1 = V.map (\x -> (x, function x)) $ V.fromList $ randDomain nSamples
   where nSamples = 50
+        function x = (cos x)^2
 
 dist x y = abs $ x - y
 
@@ -65,7 +75,7 @@ runIO (pop, g') i = do
   return (newPop, g2)
     where
       run (x, g) = runRandom (nextGeneration x) g
-      generations = 40
+      generations = 5
 
 main :: IO ()
 main = do
@@ -74,5 +84,8 @@ main = do
       popEvaluated = evaluateGeneration loss pop
   putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated)
 
-  (final, _) <- foldM runIO (popEvaluated, g') [1..100]
-  print $ last final
+  (final, _) <- foldM runIO (popEvaluated, g') [1..20]
+  let best = last final
+  print best
+  putStrLn "Interpreted expression:"
+  putStrLn $ generateCode best

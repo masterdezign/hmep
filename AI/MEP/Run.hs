@@ -5,6 +5,7 @@ module AI.MEP.Run where
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as VM
 import           System.IO.Unsafe ( unsafePerformIO )
+import           Text.Printf
 
 import           AI.MEP.Types
 
@@ -43,3 +44,23 @@ evaluate chr vmap = unsafePerformIO $ do
   evaluate :: Chromosome Double
            -> V.Vector Double
            -> V.Vector Double #-}
+
+-- | Generate code for the functions with a single output
+generateCode :: Phenotype Double -> String
+generateCode (_, chr, i) = concat expr1 ++ expr2
+  where
+    finalI = V.head i
+    expr1 = map (\k -> _f (chr V.! k) k) [0..finalI - 1]
+    expr2 = printf "result = %s\n" $ _h (chr V.! finalI)
+
+    _f (Var i) _ = ""
+    _f (C c) _ = ""
+    _f op k = printf "v%d = %s\n" k (_h op)
+
+    _h (C c) = show c
+    _h (Var i) = printf "x%d" i
+    _h (Op (s, _) i1 i2) = printf "%s %c %s" (_g (chr V.! i1) i1) s (_g (chr V.! i2) i2)
+
+    _g (C c) _ = show c
+    _g (Var i) _ = printf "x%d" i
+    _g (Op _ _ _) k = printf "v%d" k
