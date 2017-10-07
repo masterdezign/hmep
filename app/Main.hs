@@ -19,7 +19,7 @@ import           Numeric.LinearAlgebra
 import           AI.MEP
 
 ops = V.fromList [('*', (*)), ('+', (+)), ('/', (/)), ('-', (-)),
-  ('s', (\x _ -> sin x))]
+  ('s', \x _ -> sin x)]
 
 config = defaultConfig {
   c'ops = ops
@@ -68,11 +68,6 @@ sum' xss = foldl' (V.zipWith (+)) base xss
 nextGeneration
   :: [Phenotype Double] -> Rand [Phenotype Double]
 nextGeneration = evolve config loss (mutation3 config) crossover binaryTournament
-
-avgLoss :: [Phenotype Double] -> Double
-avgLoss xs =
-  let (r, len) = foldl' (\(c, i) (val, _, _) -> (c + val, i + 1)) (0, 0) xs
-  in r / (fromIntegral len)
 
 runIO (pop, g') i = do
   let (newPop, g2) = foldr (\_ xg -> run xg) (pop, g') [1..generations]

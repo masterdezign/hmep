@@ -7,3 +7,8 @@
 
 3. Improve the demo: provide a CLI interface to work
    with external data (using loadMatrix from hmatrix library)
+
+4. Performance tuning and benchmarking using Criterion package.
+   Hint: use of matrices featuring O(1) memory access
+   instead of lists of vectors ([Chromosome a], [Phenotype a]),
+   might improve the speed of such operators as binaryTournament.

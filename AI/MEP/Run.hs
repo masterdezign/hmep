@@ -4,6 +4,7 @@ module AI.MEP.Run where
 
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as VM
+import           Data.List ( foldl' )
 import           System.IO.Unsafe ( unsafePerformIO )
 import           Text.Printf
 
@@ -53,8 +54,8 @@ generateCode (_, chr, i) = concat expr1 ++ expr2
     expr1 = map (\k -> _f (chr V.! k) k) [0..finalI - 1]
     expr2 = printf "result = %s\n" $ _h (chr V.! finalI)
 
-    _f (Var i) _ = ""
     _f (C c) _ = ""
+    _f (Var i) _ = ""
     _f op k = printf "v%d = %s\n" k (_h op)
 
     _h (C c) = show c
@@ -63,4 +64,8 @@ generateCode (_, chr, i) = concat expr1 ++ expr2
 
     _g (C c) _ = show c
     _g (Var i) _ = printf "x%d" i
-    _g (Op _ _ _) k = printf "v%d" k
+    _g Op {} k = printf "v%d" k
+
+-- | Average population loss
+avgLoss :: [Phenotype Double] -> Double
+avgLoss = uncurry (/). foldl' (\(c, i) (val, _, _) -> (c + val, i + 1)) (0, 0)

@@ -6,6 +6,11 @@ module AI.MEP.Types where
 import qualified Data.Vector as V
 
 
+-- Working with lists is not optimal.
+-- For instance, a random selection operator
+-- such as binaryTournament may look for last
+-- elements in the list quite long for big
+-- populations.
 type Population a = [Chromosome a]
 
 type Phenotype a = (Double, Chromosome a, V.Vector Int)

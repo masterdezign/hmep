@@ -108,7 +108,7 @@ evaluateGeneration
      LossFunction a
      -> [Chromosome a]
      -> [Phenotype a]
-evaluateGeneration loss pop = map (phenotype loss) pop
+evaluateGeneration loss = map (phenotype loss)
 
 -- | Selection operator that produces the next evaluated population.
 --
@@ -153,8 +153,7 @@ evolve c loss mut cross select phenotypes = do
         let phen1 = sort' phen'
         return phen1
 
-  pop' <- CM.foldM ev (sort' phenotypes) [1..c'popSize c `div` 2]
-  return pop'
+  CM.foldM ev (sort' phenotypes) [1..c'popSize c `div` 2]
 
 -- | Binary tournament selection
 binaryTournament :: Ord a => [Phenotype a] -> Rand (Chromosome a)

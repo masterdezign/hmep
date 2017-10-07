@@ -61,6 +61,7 @@ module AI.MEP (
   -- * Genetic algorithm
   , initialize
   , evaluateGeneration
+  , avgLoss
   , evolve
   , binaryTournament
   , crossover
