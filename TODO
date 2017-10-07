@@ -5,5 +5,8 @@
    a) Removal of dead (unused) expressions
    b) Subexpression elimination, e.g. x0 / x0 -> 1
 
-3. Improve demo: work with external data (using loadMatrix
-   from hmatrix library)
+3. Improve the demo: provide a CLI interface to work
+   with external data (using loadMatrix from hmatrix library)
+
+4. Properly handle NaN values, which may arise e.g. after
+   division by zero
