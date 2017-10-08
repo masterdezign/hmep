@@ -40,9 +40,9 @@ uniformIn_ (a, b) = uniformIn (a, b - 1)
 -- | Returns a double value from the range of @[0, 1)@.
 -- If there is no specific reason, then prefer double @(0, 1]@.
 double_ :: PrimMonad m => RandT m Double
-double_ = (subtract magicC) <$> double
+double_ = subtract magicC <$> double
   where
-    -- Change the range (0, 1] to (0, 1].
+    -- Change the range (0, 1] to [0, 1).
     -- http://hackage.haskell.org/package/mwc-random-0.13.6.0/docs/System-Random-MWC.html#v:uniform
     magicC = 2**(-53)
 

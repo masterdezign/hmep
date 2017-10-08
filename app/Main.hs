@@ -22,7 +22,8 @@ config = defaultConfig {
   c'ops = V.fromList [
        ('*', (*)),
        ('+', (+)),
-       ('/', (/)),
+       -- Avoid division by zero
+       ('/', \x y -> if y < 1e-6 then 1 else (x / y)),
        ('-', (-)),
        ('s', \x _ -> sin x)
      ]
@@ -32,10 +33,7 @@ config = defaultConfig {
 
 -- | Absolute value distance between two scalar values
 dist :: Double -> Double -> Double
-dist x y = if isNaN x || isNaN y
-  -- Large distance
-  then 10000
-  else abs $ x - y
+dist x y = abs $ x - y
 
 -- Could be optimized
 sum' :: Num a => [V.Vector a] -> V.Vector a

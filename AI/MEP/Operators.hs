@@ -222,10 +222,9 @@ smoothMutation p c chr =
 newChromosome :: PrimMonad m =>
   Config Double          -- ^ Common configuration
   -> RandT m (Chromosome Double)
-newChromosome c = do
-  let pConst = p'const c
-      pVar = p'var c
-  V.mapM (new pConst pVar (c'vars c) (c'ops c)) $ V.enumFromN 0 (c'length c)
+newChromosome c =
+  V.mapM new' $ V.enumFromN 0 (c'length c)
+    where new' = new (p'const c) (p'var c) (c'vars c) (c'ops c)
 
 -- | Produce a new random gene
 new :: PrimMonad m =>
