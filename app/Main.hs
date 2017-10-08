@@ -29,6 +29,12 @@ config = defaultConfig {
      ]
   -- Chromosome length
   , c'length = 50
+  -- Probability to generate a new variable gene
+  , p'var = 0.1
+  -- Probability to generate a new constant gene
+  , p'const = 0.05
+  -- Probability to generate a new operator is
+  -- inferred as 1 - 0.1 - 0.5 = 0.85
   }
 
 -- | Absolute value distance between two scalar values
