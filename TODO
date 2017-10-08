@@ -6,7 +6,7 @@
    b) Subexpression elimination, e.g. x0 / x0 -> 1
 
 3. Improve the demo: provide a CLI interface to work
-   with external data (using loadMatrix from hmatrix library)
+   with external data
 
 4. Performance tuning and benchmarking using Criterion package.
    Hint: use of matrices featuring O(1) memory access
