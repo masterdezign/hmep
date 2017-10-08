@@ -20,6 +20,12 @@ data Gene a i where
   -- Operation
   Op :: F a -> i -> i -> Gene a i
 
+instance (Eq a, Eq i) => Eq (Gene a i) where
+  (C a) == (C b) = a == b
+  (Var a) == (Var b) = a == b
+  (Op (s1,_) i1 i2) == (Op (s2,_) j1 j2) = s1 == s2 && i1 == j1 && i2 == j2
+  _ == _ = False
+
 instance (Show a, Show i) => Show (Gene a i) where
   show (C c) = show c
   show (Var n) = "v" ++ show n
