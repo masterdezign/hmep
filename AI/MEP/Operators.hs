@@ -107,8 +107,8 @@ initialize c@Config { c'popSize = size } = mapM (\_ -> newChromosome c) [1..size
 evaluateGeneration
   :: Num a =>
      LossFunction a
-     -> [Chromosome a]
-     -> [Phenotype a]
+     -> Population a
+     -> Generation a
 evaluateGeneration loss = map (phenotype loss)
 
 -- | Selection operator that produces the next evaluated population.
@@ -125,11 +125,11 @@ evolve
      -- ^ Mutation
      -> (Chromosome Double -> Chromosome Double -> RandT m (Chromosome Double, Chromosome Double))
      -- ^ Crossover
-     -> ([Phenotype Double] -> RandT m (Chromosome Double))
+     -> (Generation Double -> RandT m (Chromosome Double))
      -- ^ A chromosome selection algorithm. Does not need to be random, but may be.
-     -> [Phenotype Double]
+     -> Generation Double
      -- ^ Evaluated population
-     -> RandT m [Phenotype Double]
+     -> RandT m (Generation Double)
      -- ^ New generation
 evolve c loss mut cross select phenotypes = do
   let pc = p'crossover c
@@ -157,7 +157,7 @@ evolve c loss mut cross select phenotypes = do
   CM.foldM ev (sort' phenotypes) [1..c'popSize c `div` 2]
 
 -- | Binary tournament selection
-binaryTournament :: (PrimMonad m, Ord a) => [Phenotype a] -> RandT m (Chromosome a)
+binaryTournament :: (PrimMonad m, Ord a) => Generation a -> RandT m (Chromosome a)
 binaryTournament phen = do
   (val1, cand1, _) <- drawFrom $ V.fromList phen
   (val2, cand2, _) <- drawFrom $ V.fromList phen

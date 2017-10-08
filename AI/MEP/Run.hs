@@ -67,5 +67,5 @@ generateCode (_, chr, i) = concat expr1 ++ expr2
     _g Op {} k = printf "v%d" k
 
 -- | Average population loss
-avgLoss :: [Phenotype Double] -> Double
+avgLoss :: Generation Double -> Double
 avgLoss = uncurry (/). foldl' (\(c, i) (val, _, _) -> (c + val, i + 1)) (0, 0)

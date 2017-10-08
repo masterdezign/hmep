@@ -1,5 +1,7 @@
 # Multi Expression Programming
 
+[![Build Status](https://travis-ci.org/masterdezign/hmep.svg?branch=master)](https://travis-ci.org/masterdezign/hmep)
+
 You say, not enough Haskell machine learning libraries?
 
 Here is yet another one!
