@@ -75,7 +75,9 @@ main = do
   -- Evaluate the initial population
   let popEvaluated = evaluateGeneration loss pop
 
-  putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated)
+      norm = fromIntegral $ V.length dataset
+
+  putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated / norm)
 
   -- Declare how to produce the new generation
   let nextGeneration = evolve config loss (mutation3 config) crossover binaryTournament
@@ -83,7 +85,7 @@ main = do
   -- Specify the I/O loop, which logs every 5 generation
       runIO pop i = do
         newPop <- runRandIO $ foldM (\xg _ -> nextGeneration xg) pop [1..generations]
-        putStrLn $ "Population " ++ show (i * generations) ++ ": average loss " ++ show (avgLoss newPop)
+        putStrLn $ "Population " ++ show (i * generations) ++ ": average loss " ++ show (avgLoss newPop / norm)
         return newPop
           where generations = 5
 
