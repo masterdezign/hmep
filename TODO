@@ -12,6 +12,3 @@
    Hint: use of matrices featuring O(1) memory access
    instead of lists of vectors ([Chromosome a], [Phenotype a]),
    might improve the speed of such operators as binaryTournament.
-
-5. Get rid of monad-mersenne-random as hackage package won't build
-   Maybe this package http://hackage.haskell.org/package/mwc-random?

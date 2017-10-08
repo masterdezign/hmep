@@ -73,13 +73,9 @@ module AI.MEP (
   , generateCode
 
   -- * Random
-  , Rand
-  , newPureMT
-  , runRandom
-  , evalRandom
+  , RandT
+  , runRandIO
   ) where
-
-import System.Random.Mersenne.Pure64 ( newPureMT )
 
 import AI.MEP.Types
 import AI.MEP.Operators

@@ -1,55 +1,58 @@
 module AI.MEP.Random
     (
     -- * Utilities
-    draw
-    , getNormal
-    , getMaxInt
+    drawFrom
+    , double_
+    , uniformIn_
     , withProbability
+    , runRandIO
 
-    -- * Re-exports
-    , getBool, getInt, getWord, getDouble
-    , runRandom, evalRandom
-    , Rand, Random
+    -- * Re-exports from Math.Probable.Random
+    , RandT
+    , double
+    , vectorOf
+    , vectorOfVariate
+    , uniformIn
+
+    -- * Re-exports from System.Random.MWC
+    , Variate
     ) where
 
-import Control.Monad.Mersenne.Random
-import Data.Complex (Complex (..))
-import System.Random
+import Math.Probable.Random
+import System.Random.MWC ( Variate )
+import Control.Monad.Primitive ( PrimMonad )
 import Data.Vector as V
 
--- | Randomly draw an element from a vector
-draw :: Vector a -> Rand a
-draw xs =
-  Rand $ \g -> let (n, g') = randomR (0, V.length xs - 1) g
-                   r = xs V.! n
-               in R r g'
+runRandIO :: RandT IO a -> IO a
+runRandIO = mwc
 
--- | Modify value with probability @p@
-withProbability
-  :: Double         -- ^ The probability @p@
-  -> (a -> Rand a)  -- ^ Modification function
-  -> (a -> Rand a)
+-- | Randomly draw an element from a vector
+drawFrom :: PrimMonad m => Vector a -> RandT m a
+drawFrom vec = do
+  n <- uniformIn (0, V.length vec - 1)
+  return $ vec V.! n
+
+-- | Similar to uniformIn, but using range
+-- @[a, b)@ instead of @[a, b]@ and only for integral types.
+uniformIn_ :: (PrimMonad m, Variate a, Integral a) => (a, a) -> RandT m a
+uniformIn_ (a, b) = uniformIn (a, b - 1)
+
+-- | Returns a double value from the range of @[0, 1)@.
+-- If there is no specific reason, then prefer double @(0, 1]@.
+double_ :: PrimMonad m => RandT m Double
+double_ = (subtract magicC) <$> double
+  where
+    -- Change the range (0, 1] to (0, 1].
+    -- http://hackage.haskell.org/package/mwc-random-0.13.6.0/docs/System-Random-MWC.html#v:uniform
+    magicC = 2**(-53)
+
+-- | Modify a value with the probability @p@
+withProbability :: PrimMonad m =>
+  Double               -- ^ The probability @p@
+  -> (a -> RandT m a)  -- ^ Modification function
+  -> (a -> RandT m a)
 withProbability p modify x = do
-  t <- getDouble
+  t <- double
   if t < p
      then modify x
      else return x
-
--- | Randomly generate Int between 0 and @n@.
--- Should be strictly less than n if n > 1
--- or zero otherwise. Therefore, getMaxInt 1
--- should be always 0.
-getMaxInt :: Int  -- ^ @n@
-  -> Rand Int
-getMaxInt n = do
-  r <- getDouble
-  return $ floor (r * fromIntegral n)
-
-getNormal :: Rand Double
-getNormal = do
-  -- Box-Muller method
-  u <- getDouble
-  v <- getDouble
-  let (c :+ s) = exp (0 :+ (2*pi*v))
-  let r = sqrt $ (-2) * log u
-  return $ r*c

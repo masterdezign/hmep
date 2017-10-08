@@ -66,25 +66,24 @@ sum' xss = foldl' (V.zipWith (+)) base xss
     base = V.replicate len 0
 
 nextGeneration
-  :: [Phenotype Double] -> Rand [Phenotype Double]
+  :: [Phenotype Double] -> RandT IO [Phenotype Double]
 nextGeneration = evolve config loss (mutation3 config) crossover binaryTournament
 
-runIO (pop, g') i = do
-  let (newPop, g2) = foldr (\_ xg -> run xg) (pop, g') [1..generations]
+runIO
+  :: [Phenotype Double] -> Int -> IO [Phenotype Double]
+runIO pop i = do
+  newPop <- runRandIO $ foldM (\xg _ -> nextGeneration xg) pop [1..generations]
   putStrLn $ "Population " ++ show (i * generations) ++ ": average loss " ++ show (avgLoss newPop)
-  return (newPop, g2)
-    where
-      run (x, g) = runRandom (nextGeneration x) g
-      generations = 5
+  return newPop
+    where generations = 5
 
 main :: IO ()
 main = do
-  g <- newPureMT
-  let (pop, g') = runRandom (initialize config) g
-      popEvaluated = evaluateGeneration loss pop
+  pop <- runRandIO $ initialize config
+  let popEvaluated = evaluateGeneration loss pop
   putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated)
 
-  (final, _) <- foldM runIO (popEvaluated, g') [1..20]
+  final <- foldM runIO popEvaluated [1..20]
   let best = last final
   print best
   putStrLn "Interpreted expression:"

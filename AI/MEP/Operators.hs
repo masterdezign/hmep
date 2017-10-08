@@ -25,6 +25,7 @@ import           Data.List
                  )
 import           Data.Ord ( comparing )
 import qualified Control.Monad as CM
+import           Control.Monad.Primitive ( PrimMonad )
 
 import           AI.MEP.Random
 import           AI.MEP.Types
@@ -100,7 +101,7 @@ phenotype loss chr = let (is, val) = loss (evaluate chr)
                      in (val, chr, is)
 
 -- | Randomly generate a new population
-initialize :: Config Double -> Rand (Population Double)
+initialize :: PrimMonad m => Config Double -> RandT m (Population Double)
 initialize c@Config { c'popSize = size } = mapM (\_ -> newChromosome c) [1..size]
 
 evaluateGeneration
@@ -115,20 +116,20 @@ evaluateGeneration loss = map (phenotype loss)
 -- Standard algorithm: the best offspring O replaces the worst
 -- individual W in the current population if O is better than W.
 evolve
-  ::
+  :: PrimMonad m =>
      Config Double
      -- ^ Common configuration
      -> LossFunction Double
      -- ^ Custom loss function
-     -> (Chromosome Double -> Rand (Chromosome Double))
+     -> (Chromosome Double -> RandT m (Chromosome Double))
      -- ^ Mutation
-     -> (Chromosome Double -> Chromosome Double -> Rand (Chromosome Double, Chromosome Double))
+     -> (Chromosome Double -> Chromosome Double -> RandT m (Chromosome Double, Chromosome Double))
      -- ^ Crossover
-     -> ([Phenotype Double] -> Rand (Chromosome Double))
+     -> ([Phenotype Double] -> RandT m (Chromosome Double))
      -- ^ A chromosome selection algorithm. Does not need to be random, but may be.
      -> [Phenotype Double]
      -- ^ Evaluated population
-     -> Rand [Phenotype Double]
+     -> RandT m [Phenotype Double]
      -- ^ New generation
 evolve c loss mut cross select phenotypes = do
   let pc = p'crossover c
@@ -156,24 +157,24 @@ evolve c loss mut cross select phenotypes = do
   CM.foldM ev (sort' phenotypes) [1..c'popSize c `div` 2]
 
 -- | Binary tournament selection
-binaryTournament :: Ord a => [Phenotype a] -> Rand (Chromosome a)
+binaryTournament :: (PrimMonad m, Ord a) => [Phenotype a] -> RandT m (Chromosome a)
 binaryTournament phen = do
-  (val1, cand1, _) <- draw $ V.fromList phen
-  (val2, cand2, _) <- draw $ V.fromList phen
+  (val1, cand1, _) <- drawFrom $ V.fromList phen
+  (val2, cand2, _) <- drawFrom $ V.fromList phen
   if val1 < val2
     then return cand1
     else return cand2
 
 -- | Uniform crossover operator
-crossover ::
+crossover :: PrimMonad m =>
   Chromosome a
   -> Chromosome a
-  -> Rand (Chromosome a, Chromosome a)
+  -> RandT m (Chromosome a, Chromosome a)
 crossover ca cb = do
   r <- V.zipWithM (curry (swap 0.5)) ca cb
   return $ V.unzip r
 
-swap :: Double -> (t, t) -> Rand (t, t)
+swap :: PrimMonad m => Double -> (t, t) -> RandT m (t, t)
 swap p = withProbability p (\(a, b) -> return (b, a))
 
 replaceAt :: Int -> a -> Vector a -> Vector a
@@ -182,15 +183,15 @@ replaceAt i gene chr0 =
   in c1 V.++ V.singleton gene V.++ V.tail c2
 
 -- | Mutation operator with up to three mutations per chromosome
-mutation3 ::
+mutation3 :: PrimMonad m =>
   Config Double
   -- ^ Common configuration
   -> Chromosome Double
-  -> Rand (Chromosome Double)
+  -> RandT m (Chromosome Double)
 mutation3 c chr = do
                                       -- Subtract 1 to get a non-zero head to
                                       -- replace
-  is <- nub <$> CM.replicateM k (getMaxInt (chrLen - 1))
+  is <- nub <$> CM.replicateM k (uniformIn_ (0, chrLen - 1))
   genes <- mapM new' is
   let chr' = foldr (uncurry replaceAt)
                    chr
@@ -203,13 +204,13 @@ mutation3 c chr = do
 -- | Mutation operator with a fixed mutation probability
 -- of each gene
 smoothMutation
-  ::
+  :: PrimMonad m =>
      Double
      -- ^ Probability of gene mutation
      -> Config Double
      -- ^ Common configuration
      -> Chromosome Double
-     -> Rand (Chromosome Double)
+     -> RandT m (Chromosome Double)
 smoothMutation p c chr =
   let new' = new (p'const c) (p'var c) (c'vars c) (c'ops c)
       mutate i = withProbability p (\_ -> new' i)
@@ -218,71 +219,62 @@ smoothMutation p c chr =
 -- | Randomly initialize a new chromosome.
 -- By definition, the first gene is terminal (a constant
 -- or a variable).
-newChromosome ::
+newChromosome :: PrimMonad m =>
   Config Double          -- ^ Common configuration
-  -> Rand (Chromosome Double)
+  -> RandT m (Chromosome Double)
 newChromosome c = do
   let pConst = p'const c
       pVar = p'var c
   V.mapM (new pConst pVar (c'vars c) (c'ops c)) $ V.enumFromN 0 (c'length c)
 
 -- | Produce a new random gene
-new ::
-  Double    -- ^ Probability to produce a constant
-  -> Double    -- ^ Probability to produce a variable
-  -> Int       -- ^ Number of input variables
+new :: PrimMonad m =>
+  Double     -- ^ Probability to produce a constant
+  -> Double  -- ^ Probability to produce a variable
+  -> Int     -- ^ Number of input variables
   -> Vector (F Double)   -- ^ Operations vector
   -> Int                 -- ^ Maximal operation index
-  -> Rand (Gene Double Int)
+  -> RandT m (Gene Double Int)
 new p1 p2 vars ops maxIndex = if maxIndex == 0
   -- The head must be a terminal
   -- p1' = p1 + (1 - p1 - p2) / 2 = 1/2 + p1/2 - p2/2
   then let p1' = 0.5 * (1 + p1 - p2)
        in newTerminal p1' vars
   else do
-    p' <- getDouble
+    p' <- double
     let sel | p' < p1 = newC
             | p' < (p1 + p2) = newVar vars
             | otherwise = newOp ops maxIndex
     sel
 
-newTerminal ::
-  Double        -- ^ Probability @p@ of a constant generation.
+newTerminal :: (PrimMonad m, Floating a, Variate a) =>
+  Double           -- ^ Probability @p@ of a constant generation.
                    -- @1-p@ will be the probability of a variable generation.
   -> Int           -- ^ Number of input variables
-  -> Rand (Gene Double i)
+  -> RandT m (Gene a i)
 newTerminal p vars = do
-  p' <- getDouble
+  p' <- double
   if p' < p
     then newC
     else newVar vars
 
 -- | A randomly generated variable identifier
-newVar :: Int -> Rand (Gene a i)
+newVar :: PrimMonad m => Int -> RandT m (Gene a i)
 newVar vars = do
-  var <- draw $ V.enumFromN 0 vars
+  var <- drawFrom $ V.enumFromN 0 vars
   return $ Var var
 
 -- | A random operation from the operations vector
-newOp
-  :: Vector (F a)
+newOp :: PrimMonad m =>
+  Vector (F a)
   -> Int
-  -> Rand (Gene a Int)
+  -> RandT m (Gene a Int)
 newOp ops maxIndex = do
-  op <- draw ops
-  i1 <- getMaxInt maxIndex
-  i2 <- getMaxInt maxIndex
+  op <- drawFrom ops
+  i1 <- uniformIn_ (0, maxIndex)
+  i2 <- uniformIn_ (0, maxIndex)
   return $ Op op i1 i2
 
--- | Draw a constant from the normal distribution
-newCNormal
-  :: Double  -- ^ Mean
-  -> Double  -- ^ Std deviation
-  -> Rand (Gene Double i)
-newCNormal mu sigma = do
-  n <- getNormal
-  return $ C (mu + sigma*n)
-
--- | Draw a constant from the uniform distribution
-newC :: Rand (Gene Double i)
-newC = C <$> getDouble
+-- | Draw a constant from the uniform distribution within @(-0.5, 0.5]@
+newC :: (PrimMonad m, Floating a, Variate a) => RandT m (Gene a i)
+newC = C <$> uniformIn (-0.5, 0.5)
