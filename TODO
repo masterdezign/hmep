@@ -1,9 +1,10 @@
 1. Provide a Storable instance for AI.MEP.Types.Gene
    and make the Chromosome a Data.Vector.Storable.
 
-2. Improve code generation. Features:
-   a) Removal of dead (unused) expressions
-   b) Subexpression elimination, e.g. x0 / x0 -> 1
+2. Improve code generation:
+     Perform subexpression elimination,
+     e.g. x0 / x0 should be reduced to 1
+          1 + 1 should become 2, etc.
 
 3. Improve the demo: provide a CLI interface to work
    with external data

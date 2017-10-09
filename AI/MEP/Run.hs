@@ -1,10 +1,18 @@
 {-# LANGUAGE BangPatterns #-}
 
-module AI.MEP.Run where
+module AI.MEP.Run (
+      generateCode
+    , evaluate
+    , avgLoss
+  ) where
 
 import qualified Data.Vector as V
 import qualified Data.Vector.Mutable as VM
-import           Data.List ( foldl' )
+import           Data.List (
+                   foldl'
+                 , nub
+                 , sort
+                 )
 import           System.IO.Unsafe ( unsafePerformIO )
 import           Text.Printf
 
@@ -50,9 +58,13 @@ evaluate chr vmap = unsafePerformIO $ do
 generateCode :: Phenotype Double -> String
 generateCode (_, chr, i) = concat expr1 ++ expr2
   where
+    -- A part of chromosome that is used (before the best index)
+    chr' = V.slice 0 (finalI + 1) chr
+    last' = chr' V.! finalI
+
     finalI = V.head i
-    expr1 = map (\k -> _f (chr V.! k) k) [0..finalI - 1]
-    expr2 = printf "result = %s\n" $ _h (chr V.! finalI)
+    expr1 = map (\k -> _f (chr' V.! k) k). sort. nub $ _usedGeneIx chr'
+    expr2 = printf "result = %s\n" $ _h last'
 
     _f (C c) _ = ""
     _f (Var i) _ = ""
@@ -60,11 +72,42 @@ generateCode (_, chr, i) = concat expr1 ++ expr2
 
     _h (C c) = show c
     _h (Var i) = printf "x%d" i
-    _h (Op (s, _) i1 i2) = printf "%s %c %s" (_g (chr V.! i1) i1) s (_g (chr V.! i2) i2)
+    _h (Op (s, _) i1 i2) = if isInfix s
+      then printf "%s %c %s" g1 s g2
+      else printf "%c %s %s" s g1 g2
+        where g1 = _g (chr' V.! i1) i1
+              g2 = _g (chr' V.! i2) i2
 
     _g (C c) _ = show c
     _g (Var i) _ = printf "x%d" i
     _g Op {} k = printf "v%d" k
+
+    -- Very naive infix operator check. No problem for single-character
+    -- ASCII operator representations. Otherwise, please improve.
+    isInfix x = not (elem x (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9']))
+
+-- Active genes in case of a chromosome representing a single-output function.
+-- Can be generalized to multiple outputs by several calls
+-- changing `lastPos` as an argument.
+_usedGeneIx :: Chromosome a -> [Int]
+_usedGeneIx chr = foldl' _g base $ zip pos $ map (chr V.!) pos
+  where
+    -- Position indices
+    pos = [lastPos - 1,lastPos - 2..0]
+
+    _g xs (i, (Op _ i1 i2)) = if i `elem` xs
+                           -- Previous expression depends on these
+                           then i1: i2: xs
+                           -- Dead gene, skip
+                           else xs
+    _g xs _ = xs  -- Terminal symbol, already counted
+
+    base = case last' of
+      (Op _ i1 i2) -> [i1, i2]
+      _ -> []  -- Sadly, a terminal symbol
+
+    last' = chr V.! lastPos
+    lastPos = V.length chr - 1
 
 -- | Average population loss
 avgLoss :: Generation Double -> Double

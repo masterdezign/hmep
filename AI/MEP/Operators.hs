@@ -259,9 +259,7 @@ newTerminal p vars = do
 
 -- | A randomly generated variable identifier
 newVar :: PrimMonad m => Int -> RandT m (Gene a i)
-newVar vars = do
-  var <- drawFrom $ V.enumFromN 0 vars
-  return $ Var var
+newVar vars = Var <$> uniformIn_ (0, vars)
 
 -- | A random operation from the operations vector
 newOp :: PrimMonad m =>
