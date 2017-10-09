@@ -45,7 +45,7 @@ https://en.wikipedia.org/wiki/Multi_expression_programming.
 
 ### The `hmep` Features
 
-  * **Works out of box**. You may use one of the elaborated
+  * **Works out of the box**. You may use one of the elaborated
     [examples](https://github.com/masterdezign/hmep/blob/master/app/)
     to quickly tailor to your needs.
   * **Flexibility**. The [`hmep` package](https://github.com/masterdezign/hmep/)
@@ -68,7 +68,10 @@ Use [Stack](http://haskellstack.org).
      $ git clone https://github.com/masterdezign/hmep.git && cd hmep
      $ stack build --install-ghc
 
-Now, run the demo to calculate cos^2(x) through sin(x):
+### Example 1
+
+Now that the package is built, run the first demo to
+express `cos^2(x)` through `sin(x)`:
 
      $ stack exec hmep-demo
 
@@ -90,15 +93,34 @@ no guarantee to find the globally optimal solution.
 
 The unknown function approximation problem can be illustrated
 by the following suboptimal solution for a given set of random
-data points (blue). This example was produced by another run of the
-[same demo](app/Main.hs), after 100 generations of 100 chromosomes.
+data points (blue crosses). This example was produced by another run of
+the [same demo](app/Main.hs), after 100 generations of 100 chromosomes.
 The following expression was obtained
 `y(x) = 3*0.31248786462471034 - sin(sin^2(x))`.
 Interestingly, the approximating function lies symmetrically
-in-between the extrema of the unknown function,
-approximately described by the blue crosses.
+in-between the extrema of the unknown function, approximately 
+described by the blue crosses.
 
 ![Figure](doc/Figures/cos2_approx.png)
+
+### Example 2
+
+A similar example is to approximate `sin(x)` using only
+addition and multiplication operators, i.e. with polynomials.
+
+     $ stack exec hmep-sin-approximation
+
+The algorithm is able to automatically figure out the
+powers of `x`. That is where MEP really shines. We [calculate](app/MainSin.hs)
+30 expressions represented by each chromosome with practically no
+additional computational penalty. Then, we
+choose the best expression. In this run, we have automatically obtained a
+[seventh degree polynomial](https://github.com/masterdezign/hmep/blob/master/doc/sin_approx.py#L12)
+coded by 14 genes. Pretty cool, yeah?
+
+The result of approximation is [visualized](doc/sin_approx.py) below:
+
+![Figure](doc/Figures/sin_approx.png)
 
 
 ## Authors
