@@ -43,6 +43,23 @@ https://en.wikipedia.org/wiki/Multi_expression_programming.
   * By [Mark Chenoweth](https://github.com/markcheno/go-mep), Go
   * [Current project](https://github.com/masterdezign/hmep), Haskell
 
+### The `hmep` Features
+
+  * **Works out of box**. You may use one of the elaborated
+    [examples](https://github.com/masterdezign/hmep/blob/master/app/)
+    to quickly tailor to your needs.
+  * **Flexibility**. The [`hmep` package](https://github.com/masterdezign/hmep/)
+    provides adjustable and composable building blocks such as
+    [selection](https://hackage.haskell.org/package/hmep-0.1.0/docs/src/AI-MEP-Operators.html#binaryTournament),
+    [mutation](https://hackage.haskell.org/package/hmep-0.1.0/docs/src/AI-MEP-Operators.html#smoothMutation)
+    and [crossover](https://hackage.haskell.org/package/hmep-0.1.0/docs/src/AI-MEP-Operators.html#crossover)
+    [operators](https://hackage.haskell.org/package/hmep-0.1.0/docs/AI-MEP.html).
+    One is also free to use their own operators.
+  * **Versatility**. `hmep` can be applied to solve regression problems with 
+    one or multiple outputs. It means, you can approximate unknown functions
+    or solve classification tasks. The only requirement is a custom
+    [loss function](https://github.com/masterdezign/hmep/blob/b006eb8e0ca7c0540de979631423753bf0b66750/app/Main.hs#L67).
+
 
 ## How to build
 
