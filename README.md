@@ -34,6 +34,20 @@ GA library, which inspired the present
 Multi Expression Programming is a genetic programming variant encoding multiple
 solutions in the same chromosome. A chromosome is a computer program.
 Each gene is featuring [code reuse](https://en.wikipedia.org/wiki/Code_reuse).
+
+How **MEP is different** from other genetic programming (GP) methods?
+Consider a classical example of tree-based GP.
+The number of nodes to encode `x^N`
+using a binary tree is `2N-1`.
+With MEP encoding, however, redundancies can be dramatically
+diminished so that the
+[shortest chromosome](https://github.com/masterdezign/hmep/blob/cd7b4976800d6c23ce5ebbe67f5ab5c9076229b9/test/Spec.hs#L18) 
+that encodes the same expression has only `N/2` nodes!
+That often results in significantly reduced computational costs
+when evaluating MEP chromosomes. Moreover, **all** the intermediate
+solutions such as `x^(N/2)`, `x^(N/4)`, etc. are provided by the
+chromosome as well.
+
 For more details, please check http://mepx.org/papers.html and
 https://en.wikipedia.org/wiki/Multi_expression_programming.
 
