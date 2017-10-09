@@ -84,6 +84,22 @@ Now, run the demo to calculate cos^2(x) through sin(x):
      v2 = v1 * v1
      result = 1 - v2
 
+Effectively, the solution `cos^2(x) = 1 - sin^2(x)` was found.
+Of course, MEP is a stochastic method, meaning that there is
+no guarantee to find the globally optimal solution.
+
+The unknown function approximation problem can be illustrated
+by the following suboptimal solution for a given set of random
+data points (blue). This example was produced by another run of the
+[same demo](app/Main.hs), after 100 generations of 100 chromosomes.
+The following expression was obtained
+`y(x) = 3*0.31248786462471034 - sin(sin^2(x))`.
+Interestingly, the approximating function lies symmetrically
+in-between the extrema of the unknown function,
+approximately described by the blue crosses.
+
+![Figure](doc/Figures/cos2_approx.png)
+
 
 ## Authors
 

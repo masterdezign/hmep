@@ -58,7 +58,8 @@ evaluate chr vmap = unsafePerformIO $ do
 generateCode :: Phenotype Double -> String
 generateCode (_, chr, i) = concat expr1 ++ expr2
   where
-    -- A part of chromosome that is used (before the best index)
+    -- A part of chromosome that is used (all genes ahead the `finalI`
+    -- and the gene pointed by the `finalI`)
     chr' = V.slice 0 (finalI + 1) chr
     last' = chr' V.! finalI
 
