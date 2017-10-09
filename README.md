@@ -19,7 +19,7 @@ also great.
 
 However, when I came up with this
 [MEP paper](http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.5.4352&rep=rep1&type=pdf),
-to my surprise there was no MEP realization in Haskell.
+to my surprise there was no MEP implementation in Haskell.
 Soon I realized that existing GA packages are limited,
 and it would be more efficient to implement MEP from scratch.
 
@@ -36,6 +36,12 @@ solutions in the same chromosome. A chromosome is a computer program.
 Each gene is featuring [code reuse](https://en.wikipedia.org/wiki/Code_reuse).
 For more details, please check http://mepx.org/papers.html and
 https://en.wikipedia.org/wiki/Multi_expression_programming.
+
+### MEP in open source
+
+  * By [Mihai Oltean](http://github.com/mepx), C++
+  * By [Mark Chenoweth](https://github.com/markcheno/go-mep), Go
+  * [Current project](https://github.com/masterdezign/hmep), Haskell
 
 
 ## How to build
