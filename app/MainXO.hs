@@ -18,9 +18,9 @@ import           AI.MEP
 
 config = defaultConfig
   {
-    p'const = 0.05
-  , p'var = 0.2
-  , p'mutation = 0.02
+    p'const = 0.04
+  , p'var = 0.15
+  , p'mutation = 0.03
   , p'crossover = 0.9
 
   , c'length = 50
@@ -29,17 +29,9 @@ config = defaultConfig
   , c'ops = V.fromList [
        ('*', (*)),
        ('+', (+)),
-       -- Avoid division by zero
-       ('/', \x y -> if y < 1e-6 then 1 else (x / y)),
-       ('-', (-)),
 
        ('m', min),
-       ('x', max),
-
-       ('i', \x y -> if x > 0 then x else y),
-       ('o', \x y -> if x > y then x else y),
-       ('f', \x y -> if x < y then x else y),
-       ('g', \x y -> if x < 0 then x else y)
+       ('x', max)
      ]
 
   -- 9 input variables
