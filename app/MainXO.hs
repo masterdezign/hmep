@@ -89,6 +89,12 @@ err' :: Player -> Double -> Double -> Double
 err' Neither out target = abs (out - target)
 err' _ out target = 0
 
+-- TODO
+-- tictacTournament :: (PrimMonad m, Ord a) => Generation a -> RandT m (Chromosome a)
+-- More straightforward is to play against each other.
+-- The loss function then results from play with the absolute player
+-- (it is known in this game).
+
 -- Play using the obtained expression
 -- nextMove' :: Phenotype Double -> Board -> Board
 
