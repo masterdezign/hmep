@@ -53,31 +53,34 @@ boardToVec b = V.fromList $ Seq.foldrWithIndex f [] b
 boardToList :: Board -> [Player]
 boardToList = toList
 
--- | All valid boards with at least one free position
-allBoards :: [Board]
-allBoards = map Seq.fromList. filter f $ all'
-  where f xs = (count1 + count2) < 9 && (abs (count1 - count2) < 2)
-          where count1 = count X xs
-                count2 = count O xs
-        all' = [x| x <- mapM (const [O, X, Neither]) [1..9]]
-
-allBoardsN :: Int
-allBoardsN = length allBoards
-
 count x = length. filter (x ==)
 
 outputs :: Int
 outputs = 9
 
--- | The loss function computes
+-- | Loss function computes
 -- the total number of steps needed to win over N completely random players.
--- Lost games result in higher losses.
-loss :: [Chromosome Double] -> (Vector Double -> Vector Double) -> (Vector Int, Double)
-loss randomChrs evalf = (is, loss')
+-- Lost games result in higher losses ^_^
+loss :: [(Vector Double -> Vector Double, Vector Int)]  -- ^ Players to compete with
+     -> (Vector Double -> Vector Double)   -- ^ Evaluation function
+     -> (Vector Int, Double)  -- ^ The best indices and loss value
+loss otherPlayers evalf = (is, loss')
   where
-    loss' = 0  -- sum $ ...
-    nextMoveX = nextMove2 (evalf, is) (evaluate (head randomChrs), is)
-    nextMoveO = nextMove2 (evaluate (head randomChrs), is) (evalf, is)
+    loss' = fromIntegral $ round1 + round2
+
+    winner' = winner emptyBoard
+    player = (evalf, is)
+
+    -- Player is X, odd player, + 1
+    round1 = sum $ map (f X 1. winner' player) otherPlayers
+    -- Player is O, even player, + 0
+    round2 = sum $ map (\otherp -> f O 0 $ winner' otherp player) otherPlayers
+
+    f me privilege (who, score) | who == me = score `div` 2 + privilege
+                                -- Not too bad, but slightly worse
+                                | who == Neither = 4 + privilege + 2
+                                -- Bigger loss, nothing to say
+                                | otherwise = 12
 
 -- For simplicity, fix the last 9 expressions as target outputs
 -- (can be or needs to be optimized).
@@ -85,11 +88,11 @@ is = V.enumFromN start outputs
   where start = c'length config - outputs
 
 -- | Play using expressions encoded in chromosomes
-nextMove2 :: (Vector Double -> Vector Double, Vector Int)
+nextMove' :: (Vector Double -> Vector Double, Vector Int)
   -> (Vector Double -> Vector Double, Vector Int)
   -> Board
   -> Board
-nextMove2 (evalfX, isX) (evalfO, isO) board = Seq.update idx' player' board
+nextMove' (evalfX, isX) (evalfO, isO) board = Seq.update idx' player' board
   where
     xMove = (count X $ boardToList board) == (count O $ boardToList board)
 
@@ -114,16 +117,25 @@ tictacTournament :: PrimMonad m => Generation Double -> RandT m (Chromosome Doub
 tictacTournament phens = do
   (_, cand1, is1) <- drawFrom $ V.fromList phens
   (_, cand2, is2) <- drawFrom $ V.fromList phens
-  let compete Nothing board = let !board' = nextMove2 (evaluate cand1, is1) (evaluate cand2, is2) board
-                              in compete (boardWinner board') board'
-      compete (Just player) _ = player
-  case compete Nothing emptyBoard of
-    X -> return cand1
-    O -> return cand2
-    Neither -> withProbability 0.5 (\_ -> return cand1) cand2
+  case winner emptyBoard (evaluate cand1, is1) (evaluate cand2, is2) of
+    (X, _) -> return cand1
+    (O, _) -> return cand2
+    -- Draw
+    _ -> withProbability 0.5 (\_ -> return cand1) cand2
+
+winner
+  :: Board
+     -> (Vector Double -> Vector Double, Vector Int)
+     -> (Vector Double -> Vector Double, Vector Int)
+     -> (Player, Int)
+winner = gameRound (Nothing, 0)
+  where
+    gameRound (Nothing, cnt) board ev1 ev2 = let !board' = nextMove' ev1 ev2 board
+                                        in gameRound (boardWinner board', cnt + 1) board' ev1 ev2
+    gameRound (Just player, cnt) _ _ _ = (player, round (cnt))
 
 main :: IO ()
-main = mainTest
+main = mainMEP
 
 mainTest = do
   pop <- runRandIO $ initialize config
@@ -132,7 +144,9 @@ mainTest = do
   let phenotype loss chr = let (is, val) = loss (evaluate chr)
                            in (val, chr, is)
 
-  let play = nextMove2 (evaluate chr1, is) (evaluate chr2, is)
+  let play = nextMove' (evaluate chr1, is) (evaluate chr2, is)
+
+  print $ winner emptyBoard (evaluate chr1, is) (evaluate chr2, is)
 
   let boards = take 9 $ drop 1 $ iterate play emptyBoard
       s = unlines $ map (\b -> show b  ++ " winner: " ++ (show $ boardWinner b)) boards
@@ -142,16 +156,18 @@ mainMEP = do
   -- Randomly create a population of chromosomes
   pop <- runRandIO $ initialize config
 
-  -- A constant population of dummies against which calculate loss
-  popConst <- runRandIO $ replicateM 10 (newChromosome config)
-  let loss' = loss popConst
+  -- A population of dummies against which loss is calculated.
+  -- Later, this could be replaced with the best player to
+  -- evaluate the future generations
+  let testPlayersN = 10
+  popTest <- runRandIO $ replicateM testPlayersN (newChromosome config)
 
-  putStrLn $ "The number of considered boards " ++ show allBoardsN
+  let loss' = loss (map (\chr -> (evaluate chr, is)) popTest)
 
   -- Evaluate the initial population
   let popEvaluated = evaluateGeneration loss' pop
 
-  putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated / fromIntegral allBoardsN)
+  putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated / fromIntegral testPlayersN)
 
   -- Declare how to produce the new generation
   let nextGeneration = evolve config loss' (mutation3 config) crossover tictacTournament
@@ -159,10 +175,10 @@ mainMEP = do
   -- Specify the I/O loop, which logs every generation
   let runIO pop i = do
         newPop <- runRandIO $ nextGeneration pop
-        putStrLn $ "Population " ++ show i ++ ": average loss " ++ show (avgLoss newPop / fromIntegral allBoardsN)
+        putStrLn $ "Population " ++ show i ++ ": average loss " ++ show (avgLoss newPop / fromIntegral testPlayersN)
         return newPop
 
   -- The final population
-  final <- foldM runIO popEvaluated [1..1000]
+  final <- foldM runIO popEvaluated [1..200]
   let best = last final
   print best
