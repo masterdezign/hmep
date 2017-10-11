@@ -24,11 +24,11 @@ config = defaultConfig
   {
     p'const = 0.04
   , p'var = 0.15
-  , p'mutation = 0.03
+  , p'mutation = 0.01
   , p'crossover = 0.9
 
-  , c'length = 50
-  , c'popSize = 100
+  , c'length = 45
+  , c'popSize = 20
 
   , c'ops = V.fromList [
        ('*', (*)),
@@ -72,9 +72,9 @@ loss otherPlayers evalf = (is, loss')
     player = (evalf, is)
 
     -- Player is X, odd player, + 1
-    round1 = sum $ map (f X 1. winner' player) otherPlayers
+    !round1 = sum $ map (f X 1. winner' player) otherPlayers
     -- Player is O, even player, + 0
-    round2 = sum $ map (\otherp -> f O 0 $ winner' otherp player) otherPlayers
+    !round2 = sum $ map (\otherp -> f O 0 $ winner' otherp player) otherPlayers
 
     f me privilege (who, score) | who == me = score `div` 2 + privilege
                                 -- Not too bad, but slightly worse
@@ -130,9 +130,9 @@ winner
      -> (Player, Int)
 winner = gameRound (Nothing, 0)
   where
-    gameRound (Nothing, cnt) board ev1 ev2 = let !board' = nextMove' ev1 ev2 board
-                                        in gameRound (boardWinner board', cnt + 1) board' ev1 ev2
-    gameRound (Just player, cnt) _ _ _ = (player, round (cnt))
+    gameRound !(Nothing, !cnt) board ev1 ev2 = let !board' = nextMove' ev1 ev2 board
+                                               in gameRound (boardWinner board', cnt + 1) board' ev1 ev2
+    gameRound !(Just !player, !cnt) _ _ _ = (player, cnt)
 
 main :: IO ()
 main = mainMEP
@@ -159,7 +159,7 @@ mainMEP = do
   -- A population of dummies against which loss is calculated.
   -- Later, this could be replaced with the best player to
   -- evaluate the future generations
-  let testPlayersN = 10
+  let testPlayersN = 4
   popTest <- runRandIO $ replicateM testPlayersN (newChromosome config)
 
   let loss' = loss (map (\chr -> (evaluate chr, is)) popTest)
@@ -179,6 +179,6 @@ mainMEP = do
         return newPop
 
   -- The final population
-  final <- foldM runIO popEvaluated [1..200]
+  final <- foldM runIO popEvaluated [1..2000]
   let best = last final
   print best
