@@ -44,7 +44,8 @@ config = defaultConfig
 
 -- | Encode board as a vector of numbers
 boardToVec :: Board -> Vector Double
-boardToVec b = V.fromList $ Seq.foldrWithIndex f [] b
+boardToVec !b = let !r = V.fromList $ Seq.foldrWithIndex f [] b
+                in r
   where
     f _ X xs = 1 : xs
     f _ O  xs = (-1) : xs
@@ -61,7 +62,7 @@ outputs = 9
 -- | Loss function computes
 -- the total number of steps needed to win over N completely random players.
 -- Lost games result in higher losses ^_^
-loss :: [(Vector Double -> Vector Double, Vector Int)]  -- ^ Players to compete with
+loss :: [AIPlayer]  -- ^ Players to compete with
      -> (Vector Double -> Vector Double)   -- ^ Evaluation function
      -> (Vector Int, Double)  -- ^ The best indices and loss value
 loss otherPlayers evalf = (is, loss')
@@ -72,9 +73,9 @@ loss otherPlayers evalf = (is, loss')
     player = (evalf, is)
 
     -- Player is X, odd player, + 1
-    !round1 = sum $ map (f X 1. winner' player) otherPlayers
+    round1 = sum $ map (f X 1. winner' player) otherPlayers
     -- Player is O, even player, + 0
-    !round2 = sum $ map (\otherp -> f O 0 $ winner' otherp player) otherPlayers
+    round2 = sum $ map (\otherp -> f O 0 $ winner' otherp player) otherPlayers
 
     f me privilege (who, score) | who == me = score `div` 2 + privilege
                                 -- Not too bad, but slightly worse
@@ -88,8 +89,8 @@ is = V.enumFromN start outputs
   where start = c'length config - outputs
 
 -- | Play using expressions encoded in chromosomes
-nextMove' :: (Vector Double -> Vector Double, Vector Int)
-  -> (Vector Double -> Vector Double, Vector Int)
+nextMove' :: AIPlayer
+  -> AIPlayer
   -> Board
   -> Board
 nextMove' (evalfX, isX) (evalfO, isO) board = Seq.update idx' player' board
@@ -125,8 +126,8 @@ tictacTournament phens = do
 
 winner
   :: Board
-     -> (Vector Double -> Vector Double, Vector Int)
-     -> (Vector Double -> Vector Double, Vector Int)
+     -> AIPlayer
+     -> AIPlayer
      -> (Player, Int)
 winner = gameRound (Nothing, 0)
   where
@@ -135,31 +136,14 @@ winner = gameRound (Nothing, 0)
     gameRound !(Just !player, !cnt) _ _ _ = (player, cnt)
 
 main :: IO ()
-main = mainMEP
-
-mainTest = do
-  pop <- runRandIO $ initialize config
-  let chr1 = pop !! 0
-  let chr2 = pop !! 15
-  let phenotype loss chr = let (is, val) = loss (evaluate chr)
-                           in (val, chr, is)
-
-  let play = nextMove' (evaluate chr1, is) (evaluate chr2, is)
-
-  print $ winner emptyBoard (evaluate chr1, is) (evaluate chr2, is)
-
-  let boards = take 9 $ drop 1 $ iterate play emptyBoard
-      s = unlines $ map (\b -> show b  ++ " winner: " ++ (show $ boardWinner b)) boards
-  putStrLn s
-
-mainMEP = do
+main = do
   -- Randomly create a population of chromosomes
   pop <- runRandIO $ initialize config
 
   -- A population of dummies against which loss is calculated.
   -- Later, this could be replaced with the best player to
   -- evaluate the future generations
-  let testPlayersN = 4
+  let testPlayersN = 5
   popTest <- runRandIO $ replicateM testPlayersN (newChromosome config)
 
   let loss' = loss (map (\chr -> (evaluate chr, is)) popTest)
@@ -180,5 +164,51 @@ mainMEP = do
 
   -- The final population
   final <- foldM runIO popEvaluated [1..2000]
-  let best = last final
+  let best@(_, chr, is') = last final
   print best
+
+  let aiPlayer = (evaluate chr, is')
+
+  -- Play against itself :)
+  let play = nextMove' aiPlayer aiPlayer
+
+  print $ winner emptyBoard aiPlayer aiPlayer
+
+  let boards = take 9 $ drop 1 $ iterate play emptyBoard
+      s = unlines $ map (\b -> show b  ++ " winner: " ++ (show $ boardWinner b)) boards
+  putStrLn s
+
+  -- Play with you
+  gameLoop' aiPlayer
+
+type AIPlayer = (Vector Double -> Vector Double, Vector Int)
+
+gameLoop' :: AIPlayer -> IO ()
+gameLoop' aiPlayer = do
+  boardWinner <- movesLoop' aiPlayer emptyBoard X
+  putStrLn $ case boardWinner of
+    X -> "X won!"
+    O -> "O won!"
+    Neither -> "It was a draw!"
+  putStrLn "Play again y/n"
+  answer <- getLine
+  case answer of
+    "y" -> gameLoop' aiPlayer
+    _ -> return ()
+
+movesLoop' :: AIPlayer -> Board -> Player -> IO Player
+movesLoop' aiPlayer board currentPlayer = do
+  board' <- case currentPlayer of
+    X -> do putStrLn "\n==============="
+            putStrLn "X's move:"
+            let board' = nextMove' aiPlayer aiPlayer board
+            putStr $ boardString board'
+            return board'
+    O -> do board' <- humanMove board
+            putStrLn "The result of your move:"
+            putStr $ boardString board'
+            putStrLn ""
+            return board'
+  case boardWinner board' of
+    Nothing -> movesLoop' aiPlayer board' $ oppositePlayer currentPlayer
+    Just player -> return player
