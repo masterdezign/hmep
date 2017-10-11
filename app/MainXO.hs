@@ -70,33 +70,26 @@ outputs :: Int
 outputs = 9
 
 -- | The loss function computes
--- differences between the moves
--- provided by MEP expressions and actual moves.
--- Here we use nine output variables.
---
--- For simplicity, fix the last 9 expressions
--- as target outputs.
-loss :: [Board] -> (Vector Double -> Vector Double) -> (Vector Int, Double)
-loss boards evalf = (V.enumFromN start outputs, loss')
+-- the total number of steps needed to win over N completely random players.
+-- Lost games result in higher losses.
+loss :: [Chromosome Double] -> (Vector Double -> Vector Double) -> (Vector Int, Double)
+loss randomChrs evalf = (is, loss')
   where
-    evaluated = map (V.toList. V.slice start outputs. evalf. boardToVec) boards
-    targets = map (V.toList. boardToVec. nextMove) allBoards
+    loss' = 0  -- sum $ ...
+    nextMoveX = nextMove2 (evalf, is) (evaluate (head randomChrs), is)
+    nextMoveO = nextMove2 (evaluate (head randomChrs), is) (evalf, is)
 
-    loss' = sum $ zipWith3 err (map boardToList boards) evaluated targets
-    start = c'length config - outputs
-
-err :: [Player] -> [Double] -> [Double] -> Double
-err players evals tgts = sum $ zipWith3 err' players evals tgts
-
--- | Evaluate only the outputs occupying previously empty squares
--- (not only valid moves because we do not check whose turn)
-err' :: Player -> Double -> Double -> Double
-err' Neither out target = abs (out - target)
-err' _ out target = 0
+-- For simplicity, fix the last 9 expressions as target outputs
+-- (can be or needs to be optimized).
+is = V.enumFromN start outputs
+  where start = c'length config - outputs
 
 -- | Play using expressions encoded in chromosomes
-nextMove' :: Phenotype Double -> Phenotype Double -> Board -> Board
-nextMove' (_, chrX, isX) (_, chrO, isO) board = Seq.update idx' player' board
+nextMove2 :: (Vector Double -> Vector Double, Vector Int)
+  -> (Vector Double -> Vector Double, Vector Int)
+  -> Board
+  -> Board
+nextMove2 (evalfX, isX) (evalfO, isO) board = Seq.update idx' player' board
   where
     xMove = (count X $ boardToList board) == (count O $ boardToList board)
 
@@ -104,13 +97,13 @@ nextMove' (_, chrX, isX) (_, chrO, isO) board = Seq.update idx' player' board
                     -- Assuming a valid board
                     | otherwise = (V.minIndex oIndices, O)
 
-    xIndices = nextMoveIndices chrX isX (-10)
-    oIndices = nextMoveIndices chrO isO 10
+    xIndices = nextMoveIndices evalfX isX (-10)
+    oIndices = nextMoveIndices evalfO isO 10
 
-    nextMoveIndices chr' is' bias = moveCandidates'
+    nextMoveIndices evalf is' bias = moveCandidates'
       where
         prev = boardToVec board
-        evaluated = evaluate chr' (boardToVec board)
+        evaluated = evalf (boardToVec board)
         moveCandidates = V.map (evaluated V.!) is'
         -- Consider only valid moves (unoccupied squares):
         -- Use a bias to penalize selection of invalid moves.
@@ -119,9 +112,9 @@ nextMove' (_, chrX, isX) (_, chrO, isO) board = Seq.update idx' player' board
 -- | A ticktactoe tournament selection
 tictacTournament :: PrimMonad m => Generation Double -> RandT m (Chromosome Double)
 tictacTournament phens = do
-  phen1@(_, cand1, _) <- drawFrom $ V.fromList phens
-  phen2@(_, cand2, _) <- drawFrom $ V.fromList phens
-  let compete Nothing board = let !board' = nextMove' phen1 phen2 board
+  (_, cand1, is1) <- drawFrom $ V.fromList phens
+  (_, cand2, is2) <- drawFrom $ V.fromList phens
+  let compete Nothing board = let !board' = nextMove2 (evaluate cand1, is1) (evaluate cand2, is2) board
                               in compete (boardWinner board') board'
       compete (Just player) _ = player
   case compete Nothing emptyBoard of
@@ -138,9 +131,9 @@ mainTest = do
   let chr2 = pop !! 15
   let phenotype loss chr = let (is, val) = loss (evaluate chr)
                            in (val, chr, is)
-  let phen1 = phenotype (loss allBoards) chr1
-  let phen2 = phenotype (loss allBoards) chr2
-  let play = nextMove' phen1 phen2
+
+  let play = nextMove2 (evaluate chr1, is) (evaluate chr2, is)
+
   let boards = take 9 $ drop 1 $ iterate play emptyBoard
       s = unlines $ map (\b -> show b  ++ " winner: " ++ (show $ boardWinner b)) boards
   putStrLn s
@@ -149,7 +142,9 @@ mainMEP = do
   -- Randomly create a population of chromosomes
   pop <- runRandIO $ initialize config
 
-  let loss' = loss allBoards
+  -- A constant population of dummies against which calculate loss
+  popConst <- runRandIO $ replicateM 10 (newChromosome config)
+  let loss' = loss popConst
 
   putStrLn $ "The number of considered boards " ++ show allBoardsN
 
