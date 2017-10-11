@@ -86,7 +86,7 @@ err players evals tgts = sum $ zipWith3 err' players evals tgts
 -- | Evaluate only the outputs occupying previously empty squares
 -- (not only valid moves because we do not check whose turn)
 err' :: Player -> Double -> Double -> Double
-err' Neither out target = if out == target then 0 else 1
+err' Neither out target = abs (out - target)
 err' _ out target = 0
 
 -- Play using the obtained expression
