@@ -24,7 +24,7 @@ config = defaultConfig
   {
     p'const = 0.04
   , p'var = 0.15
-  , p'mutation = 0.01
+  , p'mutation = 0.1
   , p'crossover = 0.9
 
   , c'length = 45
@@ -35,7 +35,12 @@ config = defaultConfig
        ('+', (+)),
 
        ('m', min),
-       ('x', max)
+       ('x', max),
+
+       ('i', \x y -> if x > 0 then x else y),
+       ('o', \x y -> if x > y then x else y),
+       ('f', \x y -> if x < y then x else y),
+       ('g', \x y -> if x < 0 then x else y)
      ]
 
   -- 9 input variables
@@ -135,18 +140,9 @@ winner = gameRound (Nothing, 0)
                                                in gameRound (boardWinner board', cnt + 1) board' ev1 ev2
     gameRound !(Just !player, !cnt) _ _ _ = (player, cnt)
 
-main :: IO ()
-main = do
+runMEP loss' testPlayersN = do
   -- Randomly create a population of chromosomes
   pop <- runRandIO $ initialize config
-
-  -- A population of dummies against which loss is calculated.
-  -- Later, this could be replaced with the best player to
-  -- evaluate the future generations
-  let testPlayersN = 5
-  popTest <- runRandIO $ replicateM testPlayersN (newChromosome config)
-
-  let loss' = loss (map (\chr -> (evaluate chr, is)) popTest)
 
   -- Evaluate the initial population
   let popEvaluated = evaluateGeneration loss' pop
@@ -164,10 +160,26 @@ main = do
 
   -- The final population
   final <- foldM runIO popEvaluated [1..2000]
-  let best@(_, chr, is') = last final
-  print best
+  return final
 
-  let aiPlayer = (evaluate chr, is')
+main :: IO ()
+main = do
+  -- A population of dummies against which loss is calculated.
+  let testPlayersN = 5
+  popTest <- runRandIO $ replicateM testPlayersN (newChromosome config)
+
+  let loss' = loss (map (\chr -> (evaluate chr, is)) popTest)
+
+  evolved1 <- runMEP loss' testPlayersN
+
+  -- Now compete with the best
+  let (_, bestChr, is1) = last evolved1
+      loss2 = loss [(evaluate bestChr, is1)]
+  evolved2 <- runMEP loss2 1
+
+  let (_, bestChr2, is2) = last evolved2
+
+  let aiPlayer = (evaluate bestChr2, is2)
 
   -- Play against itself :)
   let play = nextMove' aiPlayer aiPlayer
