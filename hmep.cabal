@@ -58,6 +58,7 @@ executable hmep-tictactoe
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , containers
+                     , primitive
                      , probable
                      , vector
                      , hmep

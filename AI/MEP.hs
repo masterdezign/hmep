@@ -74,7 +74,9 @@ module AI.MEP (
 
   -- * Random
   , RandT
+  , drawFrom
   , runRandIO
+  , withProbability
   ) where
 
 import AI.MEP.Types
