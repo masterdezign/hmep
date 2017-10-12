@@ -95,7 +95,6 @@ main = do
 
   -- The final population
   final <- foldM runIO popEvaluated [1..20]
-  let best = last final
-  print best
+
   putStrLn "Interpreted expression:"
-  putStrLn $ generateCode best
+  putStrLn $ generateCode (best final)

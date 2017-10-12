@@ -8,6 +8,8 @@ module AI.MEP.Operators (
   -- * Genetic operators
   , initialize
   , evaluateGeneration
+  , best
+  , worst
   , evolve
   , phenotype
   , binaryTournament
@@ -110,6 +112,14 @@ evaluateGeneration
      -> Population a
      -> Generation a
 evaluateGeneration loss = map (phenotype loss)
+
+-- | The best phenotype in the generation
+best :: Generation a -> Phenotype a
+best = last
+
+-- | The worst phenotype in the generation
+worst :: Generation a -> Phenotype a
+worst = head
 
 -- | Selection operator that produces the next evaluated population.
 --

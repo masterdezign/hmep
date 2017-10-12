@@ -62,6 +62,8 @@ module AI.MEP (
   , initialize
   , evaluateGeneration
   , avgLoss
+  , best
+  , worst
   , evolve
   , binaryTournament
   , crossover
