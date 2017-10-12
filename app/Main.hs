@@ -23,7 +23,7 @@ config = defaultConfig {
        ('*', (*)),
        ('+', (+)),
        -- Avoid division by zero
-       ('/', \x y -> if y < 1e-6 then 1 else (x / y)),
+       ('/', \x y -> if y < 1e-6 then 1 else x / y),
        ('-', (-)),
        ('s', \x _ -> sin x)
      ]
@@ -41,45 +41,27 @@ config = defaultConfig {
 dist :: Double -> Double -> Double
 dist x y = abs $ x - y
 
--- Could be optimized
-sum' :: Num a => [V.Vector a] -> V.Vector a
-sum' xss = foldl' (V.zipWith (+)) base xss
-  where
-    len = V.length $ head xss
-    base = V.replicate len 0
-
 main :: IO ()
 main = do
   -- A vector of 50 random numbers between 0 and 1 (including 1)
-  xs <- runRandIO (vectorOf 50 double)
+  let datasetSize = 50
+  xs <- runRandIO (vectorOf datasetSize double)
 
   -- Scale the values to the interval of (-pi, pi]
   let xs' = V.map ((2*pi *). subtract 0.5) xs
       -- Target function f to approximate
       function x = (cos x)^2
       -- Pairs (x, f(x))
-      dataset = V.map (\x -> (x, function x)) xs'
+      dataset = map (\x -> (x, function x)) $ V.toList xs'
 
   -- Randomly create a population of chromosomes
   pop <- runRandIO $ initialize config
 
-  let -- The loss function which depends on the dataset
-      loss evalf = (V.singleton i', loss')
-        where
-          (xs, ys) = unzip $ V.toList dataset
-          -- Distances resulting from multiple expression evaluation
-          dss = zipWith (\x y -> V.map (dist y). evalf. V.singleton $ x) xs ys
-          -- Cumulative distances for each index
-          dcumul = sum' dss
-          -- Select index minimizing cumulative distances
-          i' = V.minIndex dcumul
-          -- The loss value with respect to the index of the best expression
-          loss' = dcumul V.! i'
+  let loss = regressionLoss1 dist dataset
 
   -- Evaluate the initial population
-  let popEvaluated = evaluateGeneration loss pop
-
-      norm = fromIntegral $ V.length dataset
+  let popEvaluated = evaluatePopulation loss pop
+      norm = fromIntegral datasetSize
 
   putStrLn $ "Average loss in the initial population " ++ show (avgLoss popEvaluated / norm)
 

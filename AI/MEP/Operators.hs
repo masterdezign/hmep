@@ -7,7 +7,7 @@ module AI.MEP.Operators (
   , LossFunction
   -- * Genetic operators
   , initialize
-  , evaluateGeneration
+  , evaluatePopulation
   , best
   , worst
   , evolve
@@ -31,8 +31,9 @@ import           Control.Monad.Primitive ( PrimMonad )
 
 import           AI.MEP.Random
 import           AI.MEP.Types
-import           AI.MEP.Run ( evaluate )
+import           AI.MEP.Run ( evaluateChromosome )
 
+-- | MEP configuration
 data Config a = Config
   {
     p'const :: Double        -- ^ Probability of constant generation
@@ -99,19 +100,20 @@ phenotype
      LossFunction a
      -> Chromosome a
      -> Phenotype a
-phenotype loss chr = let (is, val) = loss (evaluate chr)
+phenotype loss chr = let (is, val) = loss (evaluateChromosome chr)
                      in (val, chr, is)
 
 -- | Randomly generate a new population
 initialize :: PrimMonad m => Config Double -> RandT m (Population Double)
 initialize c@Config { c'popSize = size } = mapM (\_ -> newChromosome c) [1..size]
 
-evaluateGeneration
+-- | Using 'LossFunction', find how fit is each chromosome in the population
+evaluatePopulation
   :: Num a =>
      LossFunction a
      -> Population a
      -> Generation a
-evaluateGeneration loss = map (phenotype loss)
+evaluatePopulation loss = map (phenotype loss)
 
 -- | The best phenotype in the generation
 best :: Generation a -> Phenotype a

@@ -18,9 +18,9 @@ pow8 :: Chromosome Double
 pow8 = V.fromList [Var 0, Op o'mult 0 0, Op o'mult 1 1, Op o'mult 2 2]
 
 testEvaluate = test [
-  "2^8" ~: V.fromList [2, 4, 16, 256] ~=? evaluate pow8Int (V.singleton (2 :: Int)),
+  "2^8" ~: V.fromList [2, 4, 16, 256] ~=? evaluateChromosome pow8Int (V.singleton (2 :: Int)),
 
-  "2.5^8" ~: V.fromList [2.5,6.25,39.0625,1525.87890625] ~=? evaluate pow8 (V.singleton (2.5 :: Double))
+  "2.5^8" ~: V.fromList [2.5,6.25,39.0625,1525.87890625] ~=? evaluateChromosome pow8 (V.singleton (2.5 :: Double))
   ]
 
 allTests = TestList [ testEvaluate ]

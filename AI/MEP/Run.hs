@@ -1,8 +1,12 @@
+-- |
+-- = Various utilities for running MEP algorithm
+
 {-# LANGUAGE BangPatterns #-}
 
 module AI.MEP.Run (
       generateCode
-    , evaluate
+    , evaluateChromosome
+    , regressionLoss1
     , avgLoss
   ) where
 
@@ -19,11 +23,11 @@ import           Text.Printf
 import           AI.MEP.Types
 
 -- | Evaluate each subexpression in a chromosome
-evaluate :: Num a
+evaluateChromosome :: Num a
          => Chromosome a  -- ^ Chromosome to evaluate
          -> V.Vector a    -- ^ Variable values
          -> V.Vector a    -- ^ Resulting vector of multiple evaluations
-evaluate chr vmap = unsafePerformIO $ do
+evaluateChromosome chr vmap = unsafePerformIO $ do
   -- Use dynamic programming to evaluate the chromosome
   v <- VM.new chrLen
 
@@ -50,7 +54,7 @@ evaluate chr vmap = unsafePerformIO $ do
   V.unsafeFreeze v
     where chrLen = V.length chr
 {-# SPECIALIZE
-  evaluate :: Chromosome Double
+  evaluateChromosome :: Chromosome Double
            -> V.Vector Double
            -> V.Vector Double #-}
 
@@ -85,7 +89,7 @@ generateCode (_, chr, i) = concat expr1 ++ expr2
 
     -- Very naive infix operator check. No problem for single-character
     -- ASCII operator representations. Otherwise, please improve.
-    isInfix x = not (elem x (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9']))
+    isInfix x = x `notElem` (['a'..'z'] ++ ['A'..'Z'] ++ ['0'..'9'])
 
 -- Active genes in case of a chromosome representing a single-output function.
 -- Can be generalized to multiple outputs by several calls
@@ -96,8 +100,8 @@ _usedGeneIx chr = foldl' _g base $ zip pos $ map (chr V.!) pos
     -- Position indices
     pos = [lastPos - 1,lastPos - 2..0]
 
-    _g xs (i, (Op _ i1 i2)) = if i `elem` xs
-                           -- Previous expression depends on these
+    _g xs (i, Op _ i1 i2) = if i `elem` xs
+                           -- Next expressions depend on these
                            then i1: i2: xs
                            -- Dead gene, skip
                            else xs
@@ -109,6 +113,44 @@ _usedGeneIx chr = foldl' _g base $ zip pos $ map (chr V.!) pos
 
     last' = chr V.! lastPos
     lastPos = V.length chr - 1
+
+-- | Loss function for regression problems with
+-- one input and one output.
+-- Not normalized with respect to the dataset size.
+regressionLoss1
+  :: (Num result, Ord result) =>
+     (b -> b -> result)  -- ^ Distance function
+     -> [(a, b)]         -- ^ Dataset
+     -> (V.Vector a -> V.Vector b)
+     -- ^ Chromosome evaluation function (partially applied 'evaluate')
+     -> (V.Vector Int, result)
+regressionLoss1 dist dataset evalf = (V.singleton i', loss')
+  where
+    (xs, ys) = unzip dataset
+    -- Distances resulting from multiple expression evaluation
+    dss = zipWith (\x y -> V.map (dist y). evalf. V.singleton $ x) xs ys
+    -- Cumulative distances for each index
+    dcumul = sum' dss
+    -- Select index minimizing cumulative distances
+    i' = V.minIndex dcumul
+    -- The loss value with respect to the index of the best expression
+    loss' = dcumul V.! i'
+{-# SPECIALIZE
+  regressionLoss1
+    ::
+      (Double -> Double -> Double)
+      -> [(Double, Double)]
+      -> (V.Vector Double -> V.Vector Double)
+      -> (V.Vector Int, Double)
+  #-}
+
+-- Could be optimized
+sum' :: Num a => [V.Vector a] -> V.Vector a
+sum' xss = foldl' (V.zipWith (+)) base xss
+  where
+    len = V.length $ head xss
+    base = V.replicate len 0
+{-# SPECIALIZE sum' :: [V.Vector Double] -> V.Vector Double #-}
 
 -- | Average population loss
 avgLoss :: Generation Double -> Double

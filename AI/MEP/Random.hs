@@ -1,3 +1,6 @@
+-- |
+-- = Random helpers
+
 module AI.MEP.Random
     (
     -- * Utilities
@@ -23,6 +26,11 @@ import System.Random.MWC ( Variate )
 import Control.Monad.Primitive ( PrimMonad )
 import Data.Vector as V
 
+-- | Alias for @mwc@:
+-- Take a 'RandT' value and run it in 'IO', generating all the random values described by the 'RandT'.
+--
+-- It initializes the random number generator. For performance reasons, it is
+-- recommended to minimize the number of calls to 'runRandIO'.
 runRandIO :: RandT IO a -> IO a
 runRandIO = mwc
 

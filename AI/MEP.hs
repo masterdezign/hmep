@@ -60,7 +60,8 @@ module AI.MEP (
 
   -- * Genetic algorithm
   , initialize
-  , evaluateGeneration
+  , evaluatePopulation
+  , regressionLoss1
   , avgLoss
   , best
   , worst

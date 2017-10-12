@@ -6,6 +6,22 @@
      e.g. x0 / x0 should be reduced to 1
           1 + 1 should become 2, etc.
 
+     And possibly, support unary operators:
+          Interpreted expression
+
+            v1 = x0 / x0
+            v3 = s x0 v1
+            v6 = v3 / v1
+            v14 = s x0 v6
+            v15 = v14 * v6
+            result = v1 - v15
+
+          should eventually become
+
+            v1 = sin x0
+            v2 = v1 * v1
+            result = 1 - v2
+
 3. Improve the demo: provide a CLI interface to work
    with external data
 
