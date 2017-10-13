@@ -115,7 +115,7 @@ Interestingly, the approximating function lies symmetrically
 in-between the extrema of the unknown function, approximately 
 described by the blue crosses.
 
-![Figure](doc/Figures/cos2_approx.png)
+![Figure](https://github.com/masterdezign/hmep/blob/bbc2bdbac4fa3269c506455a473dddfa0e95231c/doc/Figures/cos2_approx.png)
 
 ### Example 2
 
@@ -134,7 +134,7 @@ coded by 14 genes. Pretty cool, yeah?
 
 The result of approximation is [visualized](doc/sin_approx.py) below:
 
-![Figure](doc/Figures/sin_approx.png)
+![Figure](https://github.com/masterdezign/hmep/blob/d173e96acf72e482474e657880f8bd28c40694e7/doc/Figures/sin_approx.png)
 
 
 ## Authors

@@ -1,5 +1,11 @@
 # Changelog for [`hmep` package](http://hackage.haskell.org/package/hmep)
 
+## 0.1.1 *October 13th 2017*
+  * Improve code generation
+  * Add `regressionLoss1` for 1D functions to the library
+  * Add helpers `best`, `worst` working on Generation
+  * Improve examples and documentation
+
 ## 0.1.0 *October 8th 2017*
   * Breaking changes:
     drop [monad-mersenne-random](http://hackage.haskell.org/package/monad-mersenne-random)
