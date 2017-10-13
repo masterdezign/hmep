@@ -126,19 +126,20 @@ addition and multiplication operators, i.e. with polynomials.
 
 The algorithm is able to automatically figure out the
 powers of `x`. That is where MEP really shines. We [calculate](app/MainSin.hs)
-30 expressions represented by each chromosome gene practically with no
-additional computational penalty. Then, we
-choose the best expression. In this run, we have automatically obtained a
+`c'length = 30` expressions represented by each chromosome gene practically with no
+additional computational penalty. We choose the best expression among those 30
+in _each_ chromosome of the population `c'popSize = 200`.
+In this run, we have automatically obtained a
 [seventh degree polynomial](https://github.com/masterdezign/hmep/blob/master/doc/sin_approx.py#L12)
-coded by 14 genes. Pretty cool, yeah?
+coded by 14 genes. Pretty cool, huh?
 
 The result of approximation is [visualized](doc/sin_approx.py) below:
 
 ![Figure](https://github.com/masterdezign/hmep/blob/d173e96acf72e482474e657880f8bd28c40694e7/doc/Figures/sin_approx.png)
 
-From the log below, one can also infer that obtained by MEP
+From the log below, one can also infer that obtained
 approximation is better than analytical Taylor
-sine expansions of 3rd and 5th orders, but is worse than the 7th order expansion:
+sine expansions of 3rd and 5th orders. And naturally, is worse than the 7th order Taylor expansion:
 
      MEP expression: Average distance for 300 points: 0.0303
      3rd-order Taylor sine expansion: Average distance for 300 points: 0.3633
