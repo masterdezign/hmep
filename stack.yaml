@@ -37,8 +37,6 @@ resolver: lts-9.6
 # will not be run. This is useful for tweaking upstream packages.
 packages:
 - .
-- location: https://github.com/apriori/haskell-monad-mersenne-random/archive/master.zip
-  extra-dep: true
 # Dependency packages to be pulled from upstream that are not in the resolver
 # (e.g., acme-missiles-0.3)
 extra-deps:
