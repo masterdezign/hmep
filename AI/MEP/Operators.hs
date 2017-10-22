@@ -44,11 +44,10 @@ type LossFunction a =
 
 -- | Evaluates a chromosome according to the given
 -- loss function.
-phenotype
-  :: Num a =>
-     LossFunction a
-     -> Chromosome a
-     -> Phenotype a
+phenotype ::
+    LossFunction a
+    -> Chromosome a
+    -> Phenotype a
 phenotype loss chr = let (is, val) = loss (evaluateChromosome chr)
                      in (val, chr, is)
 
@@ -57,11 +56,10 @@ initialize :: (PrimMonad m, Genetic a) => Config a -> RandT m (Population a)
 initialize c@Config { c'popSize = size } = mapM (\_ -> newChromosome c) [1..size]
 
 -- | Using 'LossFunction', find how fit is each chromosome in the population
-evaluatePopulation
-  :: Num a =>
-     LossFunction a
-     -> Population a
-     -> Generation a
+evaluatePopulation ::
+    LossFunction a
+    -> Population a
+    -> Generation a
 evaluatePopulation loss = map (phenotype loss)
 
 -- | The best phenotype in the generation
@@ -77,7 +75,7 @@ worst = head
 -- Standard algorithm: the best offspring O replaces the worst
 -- individual W in the current population if O is better than W.
 evolve
-  :: (PrimMonad m, Genetic a, Num a) =>
+  :: (PrimMonad m, Genetic a) =>
      Config a
      -- ^ Common configuration
      -> LossFunction a
