@@ -23,8 +23,8 @@ import           Text.Printf
 import           AI.MEP.Types
 
 -- | Evaluate each subexpression in a chromosome
-evaluateChromosome :: Num a
-         => Chromosome a  -- ^ Chromosome to evaluate
+evaluateChromosome ::
+         Chromosome a  -- ^ Chromosome to evaluate
          -> V.Vector a    -- ^ Variable values
          -> V.Vector a    -- ^ Resulting vector of multiple evaluations
 evaluateChromosome chr vmap = unsafePerformIO $ do
@@ -53,10 +53,6 @@ evaluateChromosome chr vmap = unsafePerformIO $ do
 
   V.unsafeFreeze v
     where chrLen = V.length chr
-{-# SPECIALIZE
-  evaluateChromosome :: Chromosome Double
-           -> V.Vector Double
-           -> V.Vector Double #-}
 
 -- | Generate code for the functions with a single output
 generateCode :: Phenotype Double -> String

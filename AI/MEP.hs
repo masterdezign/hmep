@@ -81,6 +81,7 @@ module AI.MEP (
   ) where
 
 import AI.MEP.Types
+import AI.MEP.Instances
 import AI.MEP.Operators
 import AI.MEP.Run
 import AI.MEP.Random

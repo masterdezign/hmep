@@ -21,8 +21,9 @@ library
   exposed-modules:     AI.MEP
                      , AI.MEP.Run
                      , AI.MEP.Types
-  other-modules:       AI.MEP.Random
+  other-modules:       AI.MEP.Instances
                      , AI.MEP.Operators
+                     , AI.MEP.Random
   build-depends:       base >= 4.7 && < 5
                      , mwc-random
                      , primitive
