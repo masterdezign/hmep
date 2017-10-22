@@ -105,7 +105,7 @@ type Phenotype a = (Double, Chromosome a, V.Vector Int)
 -- | Abstract class ensuring generation of new random genes
 class Genetic a where
   newGene :: (PrimMonad m) => Config a -> Int -> RandT m (Gene a Int)
-  -- Remark: the following typeclass would be preferable:
+  -- Remark: the following type would be preferable:
   --   newGene :: (PrimMonad m) => Int -> RandT m (Gene a Int)
   -- Breaking changes?
 

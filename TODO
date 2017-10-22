@@ -22,16 +22,23 @@
             v2 = v1 * v1
             result = 1 - v2
 
-3. Improve the demo: provide a CLI interface to work
+3! Redefine functions `F` to have arbitrary arity instead of 2:
+   (e.g. `type F a = (BS, Vector a -> a)`).
+   Use a bytestring BS instead of Char to represent a function
+   OR represent functions with an abstract type + evaluate table
+   (potentially slower).
+
+4. Improve the demo: provide a CLI interface to work
    with external data
 
-4. Performance tuning and benchmarking using Criterion package.
+5. Performance tuning and benchmarking using Criterion package.
    Hint: use of matrices featuring O(1) memory access
    instead of lists of vectors ([Chromosome a], [Phenotype a]),
    might improve the speed of such operators as binaryTournament.
 
-5. Implement subpopulations that eventually exchange individuals
+6! Implement subpopulations that eventually exchange individuals
 
-6. Remark: the following typeclass might be preferable
+7. The following declaration of `newGene` (type class `Genetic`)
+   might be preferable
 
      newGene :: (PrimMonad m) => Int -> RandT m (Gene a Int)
