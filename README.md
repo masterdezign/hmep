@@ -75,7 +75,7 @@ https://en.wikipedia.org/wiki/Multi_expression_programming.
     [loss function](https://github.com/masterdezign/hmep/blob/b006eb8e0ca7c0540de979631423753bf0b66750/app/Main.hs#L67).
 
 
-## How to build
+## Getting Started
 
 Use [Stack](http://haskellstack.org).
 
@@ -108,8 +108,8 @@ no guarantee to find the globally optimal solution.
 The unknown function approximation problem can be illustrated
 by the following suboptimal solution for a given set of random
 data points (blue crosses). This example was produced by another run of
-the [same demo](app/Main.hs), after 100 generations of 100 chromosomes.
-The following expression was obtained
+the [same demo](app/Main.hs), after 100 generations of 100 chromosomes
+in each. The following expression was obtained
 `y(x) = 3*0.31248786462471034 - sin(sin^2(x))`.
 Interestingly, the approximating function lies symmetrically
 in-between the extrema of the unknown function, approximately 
