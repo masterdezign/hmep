@@ -1,0 +1,66 @@
+name:                hmep
+version:             0.1.1
+github:              "masterdezign/hmep"
+license:             BSD3
+author:              "Bogdan Penkovsky"
+maintainer:          "dev () penkovsky dot com"
+copyright:           "Bogdan Penkovsky"
+
+extra-source-files:
+- README.md
+- TODO
+- CHANGELOG.md
+- doc/sin_approx.py
+
+synopsis:            HMEP Multi Expression Programming –
+                     a genetic programming variant
+category:            AI
+
+description:         A multi expression programming implementation with
+                     focus on speed.
+                     .
+                     https://en.wikipedia.org/wiki/Multi_expression_programming
+
+dependencies:
+- base >= 4.7 && < 5
+- mwc-random
+- primitive
+- probable >= 0.1.2
+- vector
+
+library:
+  source-dirs: src
+
+executables:
+  hmep-demo:
+    main:                Main.hs
+    source-dirs:         app/Demo1
+    ghc-options:
+    - -threaded 
+    - -rtsopts 
+    - -with-rtsopts=-N
+    dependencies: 
+    - hmep
+
+  hmep-sin-approximation:
+    main:                Main.hs
+    source-dirs:         app/Demo2
+    ghc-options:
+    - -threaded 
+    - -rtsopts 
+    - -with-rtsopts=-N
+    dependencies:
+    - hmep
+
+
+tests:
+  hmep-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hmep
+    - HUnit

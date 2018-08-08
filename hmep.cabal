@@ -1,68 +1,99 @@
-name:                hmep
-version:             0.1.1
-synopsis:            HMEP Multi Expression Programming –
-                     a genetic programming variant
-description:         A multi expression programming implementation with
-                     focus on speed.
-                     .
-                     https://en.wikipedia.org/wiki/Multi_expression_programming
-homepage:            https://github.com/masterdezign/hmep#readme
-license:             BSD3
-license-file:        LICENSE
-author:              Bogdan Penkovsky
-maintainer:          dev at penkovsky dot com
-copyright:           2017 Bogdan Penkovsky
-category:            AI
-build-type:          Simple
-extra-source-files:  README.md TODO CHANGELOG.md doc/sin_approx.py
-cabal-version:       >=1.22
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 0dda2416bffea9960ad554b57c6819849b30ce8737ef666d5c4ca8bf361d247b
 
-library
-  exposed-modules:     AI.MEP
-                     , AI.MEP.Run
-                     , AI.MEP.Types
-  other-modules:       AI.MEP.Instances
-                     , AI.MEP.Operators
-                     , AI.MEP.Random
-  build-depends:       base >= 4.7 && < 5
-                     , mwc-random
-                     , primitive
-                     , probable >= 0.1.2
-                     , vector
-  default-language:    Haskell2010
-
-executable hmep-demo
-  hs-source-dirs:      app
-  main-is:             Main.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , probable
-                     , vector
-                     , hmep
-  default-language:    Haskell2010
-
-executable hmep-sin-approximation
-  hs-source-dirs:      app
-  main-is:             MainSin.hs
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  build-depends:       base
-                     , probable
-                     , vector
-                     , hmep
-  default-language:    Haskell2010
-
-
-test-suite hmep-test
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Spec.hs
-  build-depends:       base
-                     , HUnit
-                     , vector
-                     , hmep
-  ghc-options:         -threaded -rtsopts -with-rtsopts=-N
-  default-language:    Haskell2010
+name:           hmep
+version:        0.1.1
+synopsis:       HMEP Multi Expression Programming – a genetic programming variant
+description:    A multi expression programming implementation with focus on speed. . https://en.wikipedia.org/wiki/Multi_expression_programming
+category:       AI
+homepage:       https://github.com/masterdezign/hmep#readme
+bug-reports:    https://github.com/masterdezign/hmep/issues
+author:         Bogdan Penkovsky
+maintainer:     dev () penkovsky dot com
+copyright:      Bogdan Penkovsky
+license:        BSD3
+license-file:   LICENSE
+build-type:     Simple
+cabal-version:  >= 1.10
+extra-source-files:
+    CHANGELOG.md
+    doc/sin_approx.py
+    README.md
+    TODO
 
 source-repository head
-  type:     git
+  type: git
   location: https://github.com/masterdezign/hmep
+
+library
+  exposed-modules:
+      AI.MEP
+      AI.MEP.Instances
+      AI.MEP.Operators
+      AI.MEP.Random
+      AI.MEP.Run
+      AI.MEP.Types
+  other-modules:
+      Paths_hmep
+  hs-source-dirs:
+      src
+  build-depends:
+      base >=4.7 && <5
+    , mwc-random
+    , primitive
+    , probable >=0.1.2
+    , vector
+  default-language: Haskell2010
+
+executable hmep-demo
+  main-is: Main.hs
+  other-modules:
+      Paths_hmep
+  hs-source-dirs:
+      app/Demo1
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , hmep
+    , mwc-random
+    , primitive
+    , probable >=0.1.2
+    , vector
+  default-language: Haskell2010
+
+executable hmep-sin-approximation
+  main-is: Main.hs
+  other-modules:
+      Paths_hmep
+  hs-source-dirs:
+      app/Demo2
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , hmep
+    , mwc-random
+    , primitive
+    , probable >=0.1.2
+    , vector
+  default-language: Haskell2010
+
+test-suite hmep-test
+  type: exitcode-stdio-1.0
+  main-is: Spec.hs
+  other-modules:
+      Paths_hmep
+  hs-source-dirs:
+      test
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      HUnit
+    , base >=4.7 && <5
+    , hmep
+    , mwc-random
+    , primitive
+    , probable >=0.1.2
+    , vector
+  default-language: Haskell2010

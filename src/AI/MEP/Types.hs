@@ -55,7 +55,7 @@ defaultConfig = Config
   , c'length = 50
   , c'popSize = 100
   , c'popN = 1
-  , c'ops = V.empty
+  , c'ops = undefined
   , c'vars = 1
   }
 
