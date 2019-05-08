@@ -108,7 +108,7 @@ no guarantee to find the globally optimal solution.
 The unknown function approximation problem can be illustrated
 by the following suboptimal solution for a given set of random
 data points (blue crosses). This example was produced by another run of
-the [same demo](app/Main.hs), after 100 generations of 100 chromosomes
+the [same demo](app/Demo1/Main.hs), after 100 generations of 100 chromosomes
 in each. The following expression was obtained
 `y(x) = 3*0.31248786462471034 - sin(sin^2(x))`.
 Interestingly, the approximating function lies symmetrically
@@ -125,7 +125,7 @@ addition and multiplication operators, i.e. with polynomials.
      $ stack exec hmep-sin-approximation
 
 The algorithm is able to automatically figure out the
-powers of `x`. That is where MEP really shines. We [calculate](app/MainSin.hs)
+powers of `x`. That is where MEP really shines. We [calculate](app/Demo2/Main.hs)
 `c'length = 30` expressions represented by each chromosome gene practically with no
 additional computational penalty. We choose the best expression among those 30
 in _each_ chromosome of the population `c'popSize = 200`.
