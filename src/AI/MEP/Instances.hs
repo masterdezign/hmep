@@ -16,6 +16,30 @@ instance Genetic Double where
 instance Genetic Float where
   newGene c = new (p'const c) (p'var c) (c'vars c) (c'ops c)
 
+instance Genetic Int where
+  newGene c = newInt (0, 2) (p'const c) (p'var c) (c'vars c) (c'ops c)
+
+-- | Produce a new random gene with constants within the given range
+newInt :: PrimMonad m =>
+     (Int, Int)
+  -> Double     -- ^ Probability to produce a constant
+  -> Double  -- ^ Probability to produce a variable
+  -> Int     -- ^ Number of input variables
+  -> Vector (F Int)   -- ^ Operations vector
+  -> Int                 -- ^ Maximal operation index
+  -> RandT m (Gene Int Int)
+newInt rng p1 p2 vars ops maxIndex = if maxIndex == 0
+  -- The head must be a terminal
+  -- p1' = p1 + (1 - p1 - p2) / 2 = 1/2 + p1/2 - p2/2
+  then let p1' = 0.5 * (1 + p1 - p2)
+       in newTerminalInt rng p1' vars
+  else do
+    p' <- double
+    let sel | p' < p1 = newCInt rng
+            | p' < (p1 + p2) = newVar vars
+            | otherwise = newOp ops maxIndex
+    sel
+
 -- | Produce a new random gene
 new :: (PrimMonad m, Floating a, Variate a) =>
   Double     -- ^ Probability to produce a constant
@@ -47,6 +71,18 @@ newTerminal p vars = do
     then newC
     else newVar vars
 
+newTerminalInt :: PrimMonad m =>
+     (Int, Int)       -- ^ Values range (inclusive)
+  -> Double           -- ^ Probability @p@ of a constant generation.
+                   -- @1-p@ will be the probability of a variable generation.
+  -> Int           -- ^ Number of input variables
+  -> RandT m (Gene Int i)
+newTerminalInt rng p vars = do
+  p' <- double
+  if p' < p
+    then newCInt rng
+    else newVar vars
+
 -- | A randomly generated variable identifier
 newVar :: PrimMonad m => Int -> RandT m (Gene a i)
 newVar vars = Var <$> uniformIn_ (0, vars)
@@ -65,3 +101,6 @@ newOp ops maxIndex = do
 -- | Draw a constant from the uniform distribution within @(-0.5, 0.5]@
 newC :: (PrimMonad m, Floating a, Variate a) => RandT m (Gene a i)
 newC = C <$> uniformIn (-0.5, 0.5)
+
+newCInt :: PrimMonad m => (Int, Int) -> RandT m (Gene Int i)
+newCInt rng = C <$> uniformIn rng
