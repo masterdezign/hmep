@@ -55,7 +55,7 @@ evaluateChromosome chr vmap = unsafePerformIO $ do
     where chrLen = V.length chr
 
 -- | Generate code for the functions with a single output
-generateCode :: Phenotype Double -> String
+generateCode :: Show a => Phenotype a -> String
 generateCode (_, chr, i) = concat expr1 ++ expr2
   where
     -- A part of chromosome that is used (all genes ahead the `finalI`
