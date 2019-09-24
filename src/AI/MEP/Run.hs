@@ -149,5 +149,5 @@ sum' xss = foldl' (V.zipWith (+)) base xss
 {-# SPECIALIZE sum' :: [V.Vector Double] -> V.Vector Double #-}
 
 -- | Average population loss
-avgLoss :: Generation Double -> Double
+avgLoss :: Generation a -> Double
 avgLoss = uncurry (/). foldl' (\(c, i) (val, _, _) -> (c + val, i + 1)) (0, 0)
