@@ -133,6 +133,23 @@ In this run, we have automatically obtained a
 [seventh degree polynomial](https://github.com/masterdezign/hmep/blob/master/doc/sin_approx.py#L12)
 coded by 14 genes. Pretty cool, huh?
 
+```
+    v1 = -5.936286355387799e-2 + -5.936286355387799e-2
+    v4 = x0 + x0
+    v5 = v1 * x0
+    v7 = v4 * x0
+    v8 = v1 * v5
+    v9 = x0 * x0
+    v10 = v8 * v9
+    v11 = x0 * v10
+    v15 = -5.936286355387799e-2 * x0
+    v18 = v10 * v11
+    v20 = v7 * v15
+    v21 = v15 + x0
+    v25 = v21 + v20
+    result = v18 + v25
+```
+
 The result of approximation is [visualized](doc/sin_approx.py) below:
 
 ![Figure](https://github.com/masterdezign/hmep/blob/d173e96acf72e482474e657880f8bd28c40694e7/doc/Figures/sin_approx.png)
