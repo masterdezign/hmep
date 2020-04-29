@@ -150,6 +150,12 @@ coded by 14 genes. Pretty cool, huh?
     result = v18 + v25
 ```
 
+Which is `0.940637136446122*x - 0.118725727107756*x**3 + 0.000198691529073357*x**7`,
+can be regarded as a hand-tuned version of `x - x^3/3! + x^7/7!`.
+That is impressive given that this is computed in fourteen steps!
+Interestingly, we also observe that roughly half of expressions remain unused (e.g. v2, v3, v12...).
+
+
 The result of approximation is [visualized](doc/sin_approx.py) below:
 
 ![Figure](https://github.com/masterdezign/hmep/blob/d173e96acf72e482474e657880f8bd28c40694e7/doc/Figures/sin_approx.png)
