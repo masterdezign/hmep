@@ -151,7 +151,8 @@ coded by 14 genes. Pretty cool, huh?
 ```
 
 Which is `0.940637136446122*x - 0.118725727107756*x**3 + 0.000198691529073357*x**7`,
-can be regarded as a hand-tuned version of `x - x^3/3! + x^7/7!`.
+can be regarded as a hand-tuned version of `x - x^3/3! + x^7/7!` (the analytic expression
+is `x - x^3/3! + x^5/5! - x^7/7!`).
 That is impressive given that this is computed in fourteen steps!
 Interestingly, we also observe that roughly half of expressions remain unused (e.g. v2, v3, v12...).
 
