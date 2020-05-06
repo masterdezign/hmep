@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 7bbf11d275f1f7610e5d6c565c9b831068a9867dccb37788c4a1e837150a8217
+-- hash: 183c14bce030b45a9eef25b399f132d36e1c37b13952eea594baf91f0cde0864
 
 name:           hmep
 version:        1.0.0
@@ -65,6 +65,7 @@ executable hmep
     , optparse-applicative
     , primitive
     , probable >=0.1.2
+    , semigroups
     , vector
   default-language: Haskell2010
 

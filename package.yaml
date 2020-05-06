@@ -44,6 +44,7 @@ executables:
     - bytestring
     - cassava
     - optparse-applicative
+    - semigroups
 
   hmep-demo:
     main:                Main.hs

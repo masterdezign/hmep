@@ -88,7 +88,7 @@ Use [Stack](http://haskellstack.org).
 A CLI interface to Haskell multi expression programming
 
 Usage: hmep -f <input file> [-l|--length 30] [-m|--mutation 0.05] [-r|--var 0.1]
-            [-c|--const 0.05] [-p|--population 200]
+            [-c|--const 0.05] [-p|--population 200] [-t|--total 200]
 
 Available options:
   -h,--help                Show this help text
@@ -99,6 +99,7 @@ Available options:
   -r,--var 0.1             Probability to generate a new variable gene
   -c,--const 0.05          Probability to generate a new constant gene
   -p,--population 200      Population size
+  -t,--total 200           Total number of iterations
 ```
 
 Example: run for total of 200 algorithm iterations
