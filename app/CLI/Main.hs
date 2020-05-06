@@ -37,9 +37,21 @@ dist x y = abs $ x - y
 
 -- Functions available to genetically produced programs.
 -- Modify this to your needs.
-ops = V.fromList [ ('*', (*))
-                 , ('+', (+))
-                 ]
+ops = V.fromList [
+   ('*', (*)),
+   ('+', (+)),
+   -- Avoid division by zero
+   ('/', \x y -> if y < 1e-6 then 1 else x / y),
+   ('-', (-)),
+   ('s', \x -> sin. const x),
+   ('f', \x -> fromIntegral. floor. const x),
+   -- Power; invalid operation results in zero
+   ('^', \x y -> let z = x**y in if isNaN z || isInfinite z then 0 else z),
+   ('e', \x _ -> let z = exp x in if isNaN z || isInfinite z then 0 else z),
+   ('a', \x -> abs. const x),
+   ('n', min),
+   ('x', max)
+ ]
 
 -- | CLI options are parsed to this data structure
 data ProgOptions = ProgOptions

@@ -47,13 +47,17 @@ main = do
   -- A vector of 50 random numbers between 0 and 1 (including 1)
   let datasetSize = 50
   xs <- runRandIO (vectorOf datasetSize double)
+  let noiseAmp = 0.0  -- Noise amplitude, 0 = no noise
+  noise <- ((noiseAmp *) <$>) <$> runRandIO (vectorOf datasetSize double)
 
   -- Scale the values to the interval of (-pi, pi]
   let xs' = V.map ((2*pi *). subtract 0.5) xs
       -- Target function f to approximate
       function = sin
       -- Pairs (x, f(x))
-      dataset = map (\x -> (x, function x)) $ V.toList xs'
+      dataset = zipWith (\x n -> (x, function x + n)) (V.toList xs') (V.toList noise)
+
+  -- mapM_ (\(x, y) -> putStrLn (show x ++ ", " ++ show y)) dataset
 
   -- Randomly create a population of chromosomes
   pop <- runRandIO $ initialize config
