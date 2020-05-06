@@ -1,11 +1,13 @@
--- This file has been generated from package.yaml by hpack version 0.28.2.
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.31.2.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0dda2416bffea9960ad554b57c6819849b30ce8737ef666d5c4ca8bf361d247b
+-- hash: 7bbf11d275f1f7610e5d6c565c9b831068a9867dccb37788c4a1e837150a8217
 
 name:           hmep
-version:        0.1.1
+version:        1.0.0
 synopsis:       HMEP Multi Expression Programming – a genetic programming variant
 description:    A multi expression programming implementation with focus on speed. . https://en.wikipedia.org/wiki/Multi_expression_programming
 category:       AI
@@ -17,12 +19,11 @@ copyright:      Bogdan Penkovsky
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
-cabal-version:  >= 1.10
 extra-source-files:
-    CHANGELOG.md
-    doc/sin_approx.py
     README.md
     TODO
+    CHANGELOG.md
+    doc/sin_approx.py
 
 source-repository head
   type: git
@@ -43,6 +44,25 @@ library
   build-depends:
       base >=4.7 && <5
     , mwc-random
+    , primitive
+    , probable >=0.1.2
+    , vector
+  default-language: Haskell2010
+
+executable hmep
+  main-is: Main.hs
+  other-modules:
+      Paths_hmep
+  hs-source-dirs:
+      app/CLI
+  ghc-options: -threaded -rtsopts -with-rtsopts=-N
+  build-depends:
+      base >=4.7 && <5
+    , bytestring
+    , cassava
+    , hmep
+    , mwc-random
+    , optparse-applicative
     , primitive
     , probable >=0.1.2
     , vector

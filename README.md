@@ -82,7 +82,72 @@ Use [Stack](http://haskellstack.org).
      $ git clone https://github.com/masterdezign/hmep.git && cd hmep
      $ stack build --install-ghc
 
-### Example 1
+### CLI interface
+
+```
+A CLI interface to Haskell multi expression programming
+
+Usage: hmep -f <input file> [-l|--length 30] [-m|--mutation 0.05] [-r|--var 0.1]
+            [-c|--const 0.05] [-p|--population 200]
+
+Available options:
+  -h,--help                Show this help text
+  -f <input file>          Input file path. Format: comma-separated, two
+                           columns.
+  -l,--length 30           Chromosome length
+  -m,--mutation 0.05       Mutation probability
+  -r,--var 0.1             Probability to generate a new variable gene
+  -c,--const 0.05          Probability to generate a new constant gene
+  -p,--population 200      Population size
+```
+
+Example: run for total of 200 algorithm iterations
+
+     $ stack exec hmep -- -f data/sine.txt -t 200
+
+```
+Chromosome length: 30
+Population size: 200
+Mutation probability: 5.0e-2
+Probability to generate a new variable gene: 0.1
+Probability to generate a new constant gene: 5.0e-2
+Probability to generate a new operator: 0.85
+
+Reading file data/sine.txt
+Fetched 50 records
+
+Average loss in the initial population 0.6164572493880963
+Population 5: average loss 0.36179141986463337
+Population 10: average loss 0.35977590095295237
+Population 15: average loss 0.3592976870934518
+Population 20: average loss 0.35839623098861284
+Population 25: average loss 0.35424451881439295
+Population 30: average loss 0.31573374522629394
+Population 35: average loss 0.1864152668405434
+Population 40: average loss 8.966643495391169e-2
+Population 45: average loss 8.522968243289145e-2
+Population 50: average loss 8.522968243289145e-2
+...
+Population 200: average loss 5.51041829148264e-2
+Interpreted expression:
+v2 = x0 * x0
+v4 = -0.12453785273085771 * x0
+v5 = -0.12453785273085771 + v4
+v6 = x0 * v4
+v7 = v4 * -0.12453785273085771
+v8 = v4 * v2
+v12 = x0 + v5
+v14 = v8 + x0
+v19 = v8 * v7
+v22 = v19 * v6
+v23 = v22 * v12
+result = v14 + v23
+```
+
+CLI application source is [here](app/CLI/Main.hs).
+
+
+### Library Example 1
 
 Now that the package is built, run the first demo to
 express `cos^2(x)` through `sin(x)`:
@@ -117,7 +182,7 @@ described by the blue crosses.
 
 ![Figure](https://github.com/masterdezign/hmep/blob/bbc2bdbac4fa3269c506455a473dddfa0e95231c/doc/Figures/cos2_approx.png)
 
-### Example 2
+### Library Example 2
 
 A similar example is to approximate `sin(x)` using only
 addition and multiplication operators, i.e. with polynomials.

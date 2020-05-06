@@ -28,17 +28,14 @@
    OR represent functions with an abstract type + evaluate table
    (potentially slower).
 
-4. Improve the demo: provide a CLI interface to work
-   with external data
-
-5. Performance tuning and benchmarking using Criterion package.
+4. Performance tuning and benchmarking using Criterion package.
    Hint: use of matrices featuring O(1) memory access
    instead of lists of vectors ([Chromosome a], [Phenotype a]),
    might improve the speed of such operators as binaryTournament.
 
-6! Implement subpopulations that eventually exchange individuals
+5! Implement subpopulations that eventually exchange individuals
 
-7. The following declaration of `newGene` (type class `Genetic`)
+6. The following declaration of `newGene` (type class `Genetic`)
    might be preferable
 
      newGene :: (PrimMonad m) => Int -> RandT m (Gene a Int)

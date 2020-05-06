@@ -1,5 +1,5 @@
 name:                hmep
-version:             0.1.1
+version:             1.0.0
 github:              "masterdezign/hmep"
 license:             BSD3
 author:              "Bogdan Penkovsky"
@@ -32,6 +32,19 @@ library:
   source-dirs: src
 
 executables:
+  hmep:
+    main:                Main.hs
+    source-dirs:         app/CLI
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - hmep
+    - bytestring
+    - cassava
+    - optparse-applicative
+
   hmep-demo:
     main:                Main.hs
     source-dirs:         app/Demo1
@@ -51,7 +64,6 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - hmep
-
 
 tests:
   hmep-test:
