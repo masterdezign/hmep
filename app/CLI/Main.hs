@@ -34,9 +34,9 @@ import           Math.Probable.Random ( double )
 
 import           AI.MEP
 
--- | Absolute value distance between two scalar values
+-- | Mean-square distance between two scalar values
 dist :: Double -> Double -> Double
-dist x y = abs $ x - y
+dist x y = (x - y)^2
 
 -- Functions available to genetically produced programs.
 -- Modify this to your needs.
@@ -47,13 +47,14 @@ ops = V.fromList [
    ('/', \x y -> if y < 1e-6 then 1 else x / y),
    ('-', (-)),
    ('s', \x -> sin. const x),
-   ('f', \x -> fromIntegral. floor. const x),
-   -- Power; invalid operation results in zero
-   ('^', \x y -> let z = x**y in if isNaN z || isInfinite z then 0 else z),
-   ('e', \x _ -> let z = exp x in if isNaN z || isInfinite z then 0 else z),
-   ('a', \x -> abs. const x),
-   ('n', min),
-   ('x', max)
+   ('c', \x -> cos. const x)
+   -- ('f', \x -> fromIntegral. floor. const x),
+   -- -- Power; invalid operation results in zero
+   -- ('^', \x y -> let z = x**y in if isNaN z || isInfinite z then 0 else z),
+   -- ('e', \x _ -> let z = exp x in if isNaN z || isInfinite z then 0 else z),
+   -- ('a', \x -> abs. const x),
+   -- ('n', min),
+   -- ('x', max)
  ]
 
 -- | CLI options are parsed to this data structure
@@ -119,15 +120,15 @@ main = Op.execParser opts >>= run
       ( fullDesc
      <> header "A CLI interface to Haskell multi expression programming" )
 
-last9 (_, _, _, _, _, _, _, _, y) = y
-init9 (x1,x2,x3,x4,x5,x6,x7,x8,_) = V.fromList [x1,x2,x3,x4,x5,x6,x7,x8]
+last3 (_, _, y) = y
+init3 (x1,x2,_) = V.fromList [x1,x2]
 
 run :: ProgOptions -> IO ()
 run arg = do
   let pVar = _varProb arg
       pConst = _constProb arg
       pMut = _mutationProb arg
-      config = defaultConfig
+      config0 = defaultConfig
         { c'ops = ops
         , c'length = _chromosomeLength arg
         , p'mutation = pMut
@@ -151,15 +152,18 @@ run arg = do
   putStrLn $ "Reading file " ++ f
   bs <- BS.readFile f
   -- TODO: Improve parsing with Cassava
-  let result = decode NoHeader bs :: Either String (V.Vector (Double, Double, Double, Double, Double, Double, Double, Double, Double))
+  let result = decode NoHeader bs :: Either String (V.Vector (Double, Double, Double))
   case result of
     Left err -> error err
     Right parsed -> do
-      let dtaY = V.map last9 parsed  -- Last column
-          dtaX = V.map init9 parsed
+      let dtaY = V.map last3 parsed  -- Last column
+          dtaX = V.map init3 parsed
           dataset = (dtaX, dtaY) :: (V.Vector (V.Vector Double), V.Vector Double)
       let datasetSize = V.length dtaX
-      putStrLn $ printf "Fetched %d records\n" datasetSize
+          dim = V.length (V.head dtaX)  -- Input dimensionality
+          config = config0 { c'vars = dim }
+      putStrLn $ printf "Fetched %d records" datasetSize
+      putStrLn $ printf "Input dimensions: %d\n" dim
 
       -- Randomly create a population of chromosomes
       pop <- runRandIO $ initialize config
