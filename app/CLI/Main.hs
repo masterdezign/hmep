@@ -134,6 +134,7 @@ run arg = do
         , p'var = pVar
         , p'const = pConst
         , c'popSize = _popSize arg
+        , c'vars = 8  -- Input dimensionality. TODO: infer from data
         }
       maxIter = _maxIter arg
 
