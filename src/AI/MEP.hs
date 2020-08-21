@@ -62,6 +62,7 @@ module AI.MEP (
   , initialize
   , evaluatePopulation
   , regressionLoss1
+  , regressionLoss
   , avgLoss
   , best
   , worst

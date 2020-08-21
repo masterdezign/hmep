@@ -7,6 +7,7 @@ module AI.MEP.Run (
       generateCode
     , evaluateChromosome
     , regressionLoss1
+    , regressionLoss
     , avgLoss
   ) where
 
@@ -111,7 +112,7 @@ _usedGeneIx chr = foldl' _g base $ zip pos $ map (chr V.!) pos
     lastPos = V.length chr - 1
 
 -- | Loss function for regression problems with
--- one input and one output.
+-- one input (single variable) and one output.
 -- Not normalized with respect to the dataset size.
 regressionLoss1
   :: (Num result, Ord result) =>
@@ -140,13 +141,49 @@ regressionLoss1 dist dataset evalf = (V.singleton i', loss')
       -> (V.Vector Int, Double)
   #-}
 
--- Could be optimized
+-- | A generalized loss for multivariable datasets with single (scalar) output.
+regressionLoss
+  :: (Double -> Double -> Double)  -- ^ Distance function between two scalars
+  -> (V.Vector (V.Vector Double), V.Vector Double)
+  -- ^ Dataset xs vs ys.
+  -- Note that ys are actually a vector of singleton vectors,
+  -- i.e. V.Vector (V.Singleton Double).
+  -- We simplify to V.Vector Double.
+  -> (V.Vector Double -> V.Vector Double)
+  -- ^ Chromosome (multiple expression) evaluation function
+  -- (coming from partially applied 'evaluateChromosome').
+  -> (V.Vector Int, Double)
+regressionLoss dist (xs, ys) evalf = (V.singleton i', loss')
+  where
+    -- Distances resulting from multiple expression evaluation
+    dss0 = V.map evalf xs :: V.Vector (V.Vector Double)
+    dss = V.zipWith (\xs' y -> V.map (dist y) xs') dss0 ys :: V.Vector (V.Vector Double)
+
+    -- Cumulative distances for each index
+    dcumul = sumV dss
+    -- Select index minimizing cumulative distances,
+    -- i.e. the best sub-expression
+    i' = V.minIndex dcumul :: Int
+    -- The loss value with respect to the index of the best expression
+    loss' = dcumul V.! i'
+
 sum' :: Num a => [V.Vector a] -> V.Vector a
 sum' xss = foldl' (V.zipWith (+)) base xss
   where
     len = V.length $ head xss
-    base = V.replicate len 0
+    base = zeros len
 {-# SPECIALIZE sum' :: [V.Vector Double] -> V.Vector Double #-}
+
+-- | A vector of zeros
+zeros :: Num a => Int -> V.Vector a
+zeros len = V.replicate len 0
+
+-- | Outer sum
+sumV :: V.Vector (V.Vector Double) -> V.Vector Double
+sumV xss = V.foldl' (V.zipWith (+)) base xss
+  where
+    len = V.length $ V.head xss
+    base = zeros len
 
 -- | Average population loss
 avgLoss :: Generation Double -> Double

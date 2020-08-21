@@ -1,10 +1,13 @@
 {-
-  | = A simple CLI application
+  | = CLI application
 
   Generates an expression approximating an unknown
-  one-dimensional function f(x) using data from an external file.
+  multivariable function f(x1,x2,x3,...,x_8) using data from an external file.
 
-  File format: two comma-separated columns, x and f(x).
+  File format: comma-separated values with the function evaluations
+  in the last column, i.e.
+
+  x1 x2 x3 ... x_8 f(x1,x2,x3,...,x_8)
 
 -}
 
@@ -116,6 +119,9 @@ main = Op.execParser opts >>= run
       ( fullDesc
      <> header "A CLI interface to Haskell multi expression programming" )
 
+last9 (_, _, _, _, _, _, _, _, y) = y
+init9 (x1,x2,x3,x4,x5,x6,x7,x8,_) = V.fromList [x1,x2,x3,x4,x5,x6,x7,x8]
+
 run :: ProgOptions -> IO ()
 run arg = do
   let pVar = _varProb arg
@@ -144,17 +150,21 @@ run arg = do
 
   putStrLn $ "Reading file " ++ f
   bs <- BS.readFile f
-  let result = decode NoHeader bs :: Either String (V.Vector (Double, Double))
+  -- TODO: Improve parsing with Cassava
+  let result = decode NoHeader bs :: Either String (V.Vector (Double, Double, Double, Double, Double, Double, Double, Double, Double))
   case result of
     Left err -> error err
-    Right dataset -> do
-      let datasetSize = V.length dataset
+    Right parsed -> do
+      let dtaY = V.map last9 parsed  -- Last column
+          dtaX = V.map init9 parsed
+          dataset = (dtaX, dtaY) :: (V.Vector (V.Vector Double), V.Vector Double)
+      let datasetSize = V.length dtaX
       putStrLn $ printf "Fetched %d records\n" datasetSize
 
       -- Randomly create a population of chromosomes
       pop <- runRandIO $ initialize config
 
-      let loss = regressionLoss1 dist (V.toList dataset)
+      let loss = regressionLoss dist dataset
 
       -- Evaluate the initial population
       let popEvaluated = evaluatePopulation loss pop
@@ -174,6 +184,8 @@ run arg = do
 
       -- The final population
       final <- foldM runIO popEvaluated [1..(maxIter `div` 5)]
+
+      putStrLn $ show $ best final
 
       putStrLn "Interpreted expression:"
       putStrLn $ generateCode (best final)
