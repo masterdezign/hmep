@@ -127,14 +127,13 @@ run arg = do
   let pVar = _varProb arg
       pConst = _constProb arg
       pMut = _mutationProb arg
-      config = defaultConfig
+      config0 = defaultConfig
         { c'ops = ops
         , c'length = _chromosomeLength arg
         , p'mutation = pMut
         , p'var = pVar
         , p'const = pConst
         , c'popSize = _popSize arg
-        , c'vars = 8  -- Input dimensionality. TODO: infer from data
         }
       maxIter = _maxIter arg
 
@@ -160,7 +159,10 @@ run arg = do
           dtaX = V.map init9 parsed
           dataset = (dtaX, dtaY) :: (V.Vector (V.Vector Double), V.Vector Double)
       let datasetSize = V.length dtaX
-      putStrLn $ printf "Fetched %d records\n" datasetSize
+          dim = V.length (V.head dtaX)  -- Input dimensionality
+          config = config0 { c'vars = dim }
+      putStrLn $ printf "Fetched %d records" datasetSize
+      putStrLn $ printf "Input dimensions: %d\n" dim
 
       -- Randomly create a population of chromosomes
       pop <- runRandIO $ initialize config
