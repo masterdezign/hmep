@@ -142,6 +142,7 @@ regressionLoss1 dist dataset evalf = (V.singleton i', loss')
   #-}
 
 -- | A generalized loss for multivariable datasets with single (scalar) output.
+-- Normalized by the dataset size.
 regressionLoss
   :: (Double -> Double -> Double)  -- ^ Distance function between two scalars
   -> (V.Vector (V.Vector Double), V.Vector Double)
@@ -155,6 +156,8 @@ regressionLoss
   -> (V.Vector Int, Double)
 regressionLoss dist (xs, ys) evalf = (V.singleton i', loss')
   where
+    datasetSize = V.length ys
+
     -- Distances resulting from multiple expression evaluation
     dss0 = V.map evalf xs :: V.Vector (V.Vector Double)
     dss = V.zipWith (\xs' y -> V.map (dist y) xs') dss0 ys :: V.Vector (V.Vector Double)
@@ -165,7 +168,7 @@ regressionLoss dist (xs, ys) evalf = (V.singleton i', loss')
     -- i.e. the best sub-expression
     i' = V.minIndex dcumul :: Int
     -- The loss value with respect to the index of the best expression
-    loss' = dcumul V.! i'
+    loss' = (dcumul V.! i') / fromIntegral datasetSize
 
 sum' :: Num a => [V.Vector a] -> V.Vector a
 sum' xss = foldl' (V.zipWith (+)) base xss

@@ -9,6 +9,11 @@
 
   x1 x2 x3 ... x_8 f(x1,x2,x3,...,x_8)
 
+  For example, run 2000 iterations expressions of maximal length 30
+  with mutation probability 0.2 and the population of 400 chromosomes.
+
+  $ stack exec hmep -- -f Data.csv -t 2000 --var 0.2 -l 30 -m 0.2 -p 400
+
 -}
 
 {-# LANGUAGE FlexibleInstances #-}
@@ -34,9 +39,9 @@ import           Math.Probable.Random ( double )
 
 import           AI.MEP
 
--- | Absolute value distance between two scalar values
+-- | (Mean) square error
 dist :: Double -> Double -> Double
-dist x y = abs $ x - y
+dist x y = (x - y)^2
 
 -- Functions available to genetically produced programs.
 -- Modify this to your needs.
@@ -44,16 +49,16 @@ ops = V.fromList [
    ('*', (*)),
    ('+', (+)),
    -- Avoid division by zero
-   ('/', \x y -> if y < 1e-6 then 1 else x / y),
+   ('/', \x y -> x / (y + 1e-6)),
    ('-', (-)),
    ('s', \x -> sin. const x),
    ('f', \x -> fromIntegral. floor. const x),
    -- Power; invalid operation results in zero
    ('^', \x y -> let z = x**y in if isNaN z || isInfinite z then 0 else z),
    ('e', \x _ -> let z = exp x in if isNaN z || isInfinite z then 0 else z),
-   ('a', \x -> abs. const x),
-   ('n', min),
-   ('x', max)
+   ('a', \x -> abs. const x)
+   -- ('n', min),
+   -- ('x', max)
  ]
 
 -- | CLI options are parsed to this data structure
