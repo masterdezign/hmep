@@ -165,7 +165,7 @@ regressionLoss dist (xs, ys) evalf = (V.singleton i', loss')
     -- i.e. the best sub-expression
     i' = V.minIndex dcumul :: Int
     -- The loss value with respect to the index of the best expression
-    loss' = dcumul V.! i'
+    loss' = (dcumul V.! i') / fromIntegral (V.length ys)
 
 sum' :: Num a => [V.Vector a] -> V.Vector a
 sum' xss = foldl' (V.zipWith (+)) base xss
