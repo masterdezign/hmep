@@ -51,12 +51,13 @@ ops = V.fromList [
    -- Avoid division by zero
    ('/', \x y -> x / (y + 1e-6)),
    ('-', (-)),
-   ('s', \x -> sin. const x),
-   ('f', \x -> fromIntegral. floor. const x),
+   ('g', \x y -> if x > 0 then log x else y),
+   -- ('s', \x -> sin. const x),
+   -- ('f', \x -> fromIntegral. floor. const x),
    -- Power; invalid operation results in zero
-   ('^', \x y -> let z = x**y in if isNaN z || isInfinite z then 0 else z),
-   ('e', \x _ -> let z = exp x in if isNaN z || isInfinite z then 0 else z),
-   ('a', \x -> abs. const x)
+   ('^', \x y -> let z = x**y in if isNaN z || isInfinite z then y else z),
+   ('e', \x y -> let z = exp x in if isNaN z || isInfinite z then y else z)
+   -- ('a', \x -> abs. const x),
    -- ('n', min),
    -- ('x', max)
  ]
@@ -124,8 +125,8 @@ main = Op.execParser opts >>= run
       ( fullDesc
      <> header "A CLI interface to Haskell multi expression programming" )
 
-last9 (_, _, _, _, _, _, _, _, y) = y
-init9 (x1,x2,x3,x4,x5,x6,x7,x8,_) = V.fromList [x1,x2,x3,x4,x5,x6,x7,x8]
+last6 (_, _, _, _, _,  y) = y
+init6 (x1,x2,x3,x4,x5,_) = V.fromList [x1,x2,x3,x4,x5]
 
 run :: ProgOptions -> IO ()
 run arg = do
@@ -156,12 +157,12 @@ run arg = do
   putStrLn $ "Reading file " ++ f
   bs <- BS.readFile f
   -- TODO: Improve parsing with Cassava
-  let result = decode NoHeader bs :: Either String (V.Vector (Double, Double, Double, Double, Double, Double, Double, Double, Double))
+  let result = decode NoHeader bs :: Either String (V.Vector (Double, Double, Double, Double, Double, Double))
   case result of
     Left err -> error err
     Right parsed -> do
-      let dtaY = V.map last9 parsed  -- Last column
-          dtaX = V.map init9 parsed
+      let dtaY = V.map last6 parsed  -- Last column
+          dtaX = V.map init6 parsed
           dataset = (dtaX, dtaY) :: (V.Vector (V.Vector Double), V.Vector Double)
       let datasetSize = V.length dtaX
           dim = V.length (V.head dtaX)  -- Input dimensionality
